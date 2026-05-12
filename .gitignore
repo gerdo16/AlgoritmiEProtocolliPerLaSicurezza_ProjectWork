@@ -1,5 +1,17 @@
 *
 
 !.gitignore
+!README.md
+
 !*/
+
+# Ignoriamo tutti i file .tex in tutte le sottocartelle
 !*.tex
+
+!docs/img/
+!docs/img/*
+
+!source/
+!source/*
+
+# Alla fine -> !*.pdf

@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry} 
+\usepackage{geometry} 
 \usepackage{amsmath,amsthm,amssymb,graphicx,mathtools,tikz,hyperref,multicol,cancel,enumitem,booktabs,float,pgfplots,multirow,mathrsfs,textcomp,gensymb,soul,changepage,threeparttable}
 \usepackage[italian]{babel}
 \usepackage{hyphenat}
@@ -42,17 +42,24 @@
 
 \hypersetup {
 	colorlinks,
-	linkcolor=blue
+	linkcolor=black
 }
 
 \graphicspath{{img/}}
+
+\geometry{
+	top=2cm,
+	bottom=2cm,
+	left=1.5cm,
+	right=1.5cm
+}
 
 \begin{document}
 	\setlength{\parindent}{0pt}
 	\title{\vspace{-4em}{\large Algoritmi e Protocolli per la Sicurezza} \\
 		Project Work}
 	\author{Gerardo Selce - IEE22700089 \\
-			Andrea Savastano - XXXXXXXXX}
+			Andrea Savastano - IEE22700086}
 	\date{10/05/2026}
 	\maketitle
 	
@@ -62,20 +69,28 @@
 	\end{center}
 	\par\noindent\rule{\textwidth}{0.4pt}
 	
+	
+	
 	\tableofcontents
-	\newpage  
+	\newpage
 	
 	
 	\section{Introduzione}
+	\input{./subPages/Introduzione.tex}
 	
 	\section{Work Package 1}
+	\input{./subPages/WP1.tex}
 	
 	\section{Work Package 2}
+	\input{./subPages/WP2.tex}
 	
 	\section{Work Package 3}
+	\input{./subPages/WP3.tex}
 	
 	\section{Work Package 4}
+	\input{./subPages/WP4.tex}
 
 	\section{Conclusioni}
+	\input{./subPages/Conclusioni.tex}
 	
 \end{document}
