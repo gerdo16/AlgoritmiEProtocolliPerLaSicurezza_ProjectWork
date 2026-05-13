@@ -13,7 +13,7 @@ Garantisce l'autenticità dei destinatari e prevenire attacchi MIM.
     3. Cifratura Esterna: $C_{final} = \text{Enc}_{pk_A}(\sigma \| c\| Cert(U))$. Questo C è protetto per A, ed è il pacchetto finale destinato ad A
     
     Questo è lo schema Sign-then-Encrypt che garantisce l'anonimato per chiunque intercetti il pacchetto e poi A saprà solo al limite che l'utente U ha votato (perchè ha il certificato) ma non saprà il voto perchè il voto può decifrarlo solo e soltanto S. Quindi lo schema è StE + Cifratura iniziale.
-2. A riceve il packet e agisce come un proxy (???) di sicurezza:
+2. A riceve il packet e agisce come un proxy di sicurezza:
     1. Decifrazione: Usa $sk_A$ per aprire il pacchetto e ottiene quindi $(\sigma \| c\| Cert(U))$
     2. A prende Cert(U) e contatta la CA per verificarlo
     3. A verifica sul database che l'utente non abbia già votato, controllando se era già presente l'hash del suo certificato.
