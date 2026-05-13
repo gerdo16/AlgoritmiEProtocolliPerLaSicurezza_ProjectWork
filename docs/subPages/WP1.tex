@@ -17,9 +17,61 @@ Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario n
 \paragraph{CA :} 
 
 
-
 \subsection{Threat model e Asset}
 
+
 \subsection{Requisiti del sistema e priorità}
+\begin{table}[H]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.4} % Aumenta l'altezza delle righe per leggibilità
+	\begin{tabularx}{\textwidth}{l X c c c}
+		\toprule
+		\rowcolor{headergray}
+		\textbf{Classe} & \textbf{Metodo (Tipo)} & \textbf{Complessità} & $\bm{WMC_{classe}}$ & $\bm{WMC_{classe}}$ \\ 
+		\midrule
+		
+		\textbf{Library} & Library() \textit{\footnotesize (C)} & Low & 1 & 11\\
+		& searchBooks(...) \textit{\footnotesize (I)} & Average & 9 \\
+		& viewUsers() \textit{\footnotesize (S)} & Low & 1 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{Book} & Book(...) \textit{\footnotesize (C)} & Low & 1 & 1 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{Reservation} & Reservation(...) \textit{\footnotesize (C)} & Average & 4 & 4 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{User} & User(...) \textit{\footnotesize (C)} & Low & 1 & 57 \\
+		& register(...) \textit{\footnotesize (M)} & High & 20 \\
+		& login(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& logout(...) \textit{\footnotesize (M)} & High & 20 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{Staff} & Staff() \textit{\footnotesize (C)} & Low & 1 & 102 \\
+		& addBook(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& updateBook(...) \textit{\footnotesize (M)} & High & 20 \\
+		& removeBook(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& viewAllReservations() \textit{\footnotesize (S)} & Low & 1 \\
+		& approveReservation(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& cancelReservation(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& sendReminder(...) \textit{\footnotesize (M)} & Average & 16 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{Reg. User} & RegisteredUser(...) \textit{\footnotesize (C)} & Low & 1 & 46 \\
+		& reserveBook(...) \textit{\footnotesize (M)} & High & 20 \\
+		& returnBook(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& viewReservedBooks() \textit{\footnotesize (I)} & Average & 9 \\
+		\addlinespace[0.5em] \hline \addlinespace[0.5em]
+		
+		\textbf{Admin} & Administrator() \textit{\footnotesize (C)} & Low & 1 & 53 \\
+		& manageUsers(...) \textit{\footnotesize (M)} & High & 20 \\
+		& assignRole(...) \textit{\footnotesize (M)} & Average & 16 \\
+		& deleteUser(...) \textit{\footnotesize (M)} & Average & 16 \\
+		
+		\bottomrule
+	\end{tabularx}
+	\caption{Analisi dettagliata WMC per classi e metodi (Legenda: C=Constructor, S=Selector, M=Modifier, I=Iterator).}
+\end{table}
 
 \subsection{Assunzioni del sistema}
