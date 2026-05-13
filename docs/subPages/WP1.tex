@@ -6,10 +6,9 @@ Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e c
 L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti l'utente perde la possibilità di votare e si compromette il sistema.\\
 Quindi tale elettore legittimato deve avere una prova della propria identità, in modo tale da poter dimostrare al Server di essere un utente legittimo.
 
-\paragraph{Server (S):} L'entità Server è incaricata di conservare tutte le preferenze degli utenti sul referendum, e di contare i voti per determinare il risultato finale.\\
+\paragraph{Server (S):} L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
 Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
-L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validati, in questo senso che non passano i processi di verifica previsti dal protocollo.\\
+L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi\\
 
 \paragraph{Authenticator (A):} L'authenticator è l'entità che si interpone tra 
 
