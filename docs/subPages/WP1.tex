@@ -17,8 +17,9 @@
 	L'authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
 	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
 
-\paragraph{CA :} 
-	aiutoo
+\paragraph{Certification Authority (CA):}
+	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa parte del sistema è assunta, per definizione, come fidata.
+	
 
 \divider
 
@@ -30,7 +31,7 @@
 		\begin{itemize}
 			\item \textbf{Impersonificazione dell'Utente (Identity Theft):}  L'attaccante tenta di votare spacciandosi per un elettore legittimo, quindi tenta di autenticarsi con l'Authenticator per conto di un elettore legittimo e votare al suo posto, compromettendo l'origine di quel voto. 
 			
-			\item \textbf{Impersonificazione del Authenticator (Spoofing):}
+			\item \textbf{Impersonificazione dell'Authenticator (Spoofing):}
 			Il malintenzionato crea un Authenticator fittizio per catturare le richieste di votazione da parte di utenti legittimi e quindi può annullare delle votazioni o sostituire il voto con un altro a sua scelta.
 			
 			\item \textbf{Impersonificazione del Server (Spoofing):}
