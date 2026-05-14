@@ -1,58 +1,108 @@
 \subsection{Attori del sistema}
-Gli attori onesti inclusi nel sistema utilizzano il protocollo sicuro per completare il processo di votazione, e sono quattro.
-\paragraph{User (U):} L'utente è l'entità del sistema che rappresenta l'elettore legittimato a votare. Quindi il suo obiettivo è quello di contattare il Server per inviare il proprio voto, ossia la sua preferenza sul referendum binario, scegliendo tra \textit{"SI"} e \textit{"NO"}.\\
-L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
-Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
-L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti l'utente perde la possibilità di votare e si compromette il sistema.\\
-Quindi tale elettore legittimato deve avere una prova della propria identità, in modo tale da poter dimostrare al Server di essere un utente legittimo.
+	Gli attori onesti inclusi nel sistema utilizzano il protocollo sicuro per completare il processo di votazione, e sono quattro.
+\paragraph{User (U):}
+	L'utente è l'entità del sistema che rappresenta l'elettore legittimato a votare. Quindi il suo obiettivo è quello di contattare il Server per inviare il proprio voto, ossia la sua preferenza sul referendum binario, scegliendo tra \textit{"SI"} e \textit{"NO"}.\\
+	L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
+	Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
+	L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti l'utente perde la possibilità di votare e si compromette il sistema.\\
+	Quindi tale elettore legittimato deve avere una prova della propria identità, in modo tale da poter dimostrare al Server di essere un utente legittimo.
 
-\paragraph{Server (S):} L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
-L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.
+\paragraph{Server (S):}
+	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
+	Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
+	L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
+	L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.
 
-\paragraph{Authenticator (A):} L'authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
-Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
+\paragraph{Authenticator (A):}
+	L'authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
+	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
 
 \paragraph{CA :} 
-aiutoo
+	aiutoo
 
-\subsection{Threat model e Asset}
-aiutoo
+\divider
+
+\subsection{Threat model}
+	Il sistema deve garantire che il processo di votazione da parte di elettori legittimi avvenga in maniera sicura, in modo tale da fronteggiare diversi attacchi possibili, ossia delle minacce (threat) al sistema da parte di malintenzionati con l'obiettivo di compromettere il sistema.\\
+	è possibile classificare le minacce in base alla tipologia.
+	
+	\subsubsection{Attacchi all'Autenticità e Identità}
+		\begin{itemize}
+			\item \textbf{Impersonificazione dell'Utente (Identity Theft):}  L'attaccante tenta di votare spacciandosi per un elettore legittimo, quindi tenta di autenticarsi con l'Authenticator per conto di un elettore legittimo e votare al suo posto, compromettendo l'origine di quel voto. 
+			
+			\item \textbf{Impersonificazione del Authenticator (Spoofing):}
+			Il malintenzionato crea un Authenticator fittizio per catturare le richieste di votazione da parte di utenti legittimi e quindi può annullare delle votazioni o sostituire il voto con un altro a sua scelta.
+			
+			\item \textbf{Impersonificazione del Server (Spoofing):}
+			Il malintenzionato crea un Server fittizio in modo da ricevere i voti degli utenti e annullarli oppure modificarli.
+		\end{itemize}
+	
+	\subsubsection{Attacchi all'Integrità (Attivi)}
+		\begin{itemize}
+			\item \textbf{Man-in-the-Middle (MIM):} L'attaccante intercetta il pacchetto del voto e modifica la preferenza di voto nel cifrato, quindi manipola la comunicazione tentando di compromettere la confidenzialità e l'integrità.
+
+			\item \textbf{Replay Attack:} Un utente o l'attaccante intercetta un voto valido e lo invia più volte per compromettere il conteggio.
+		\end{itemize}
+		
+	\subsubsection{Attacchi all'anonimato}
+		\begin{itemize}
+			\item \textbf{Eavesdropping (Intercettazione Passiva):}
+			Similmente all'attacco MIM, l'attaccante intercetta il pacchetto e legge i dati che transitano sulla rete, quindi legge il voto con l'obiettivo di compromettere l'anonimato.
+
+			\item \textbf{Authenticator Curioso (Insider Threat su A):} Il gestore dell'Authenticator prova a vedere cosa ha votato un utente di cui conosce l'identità.
+
+			\item \textbf{Server Curioso (Insider Threat su S):} Il gestore del Server prova a risalire a chi ha espresso un determinato voto.
+
+			\item \textbf{Analisi del Traffico:} L'attaccante osserva la dimensione dei pacchetti per intuire il voto.
+		\end{itemize}
+		
+	\subsubsection{Attacchi Crittografici (Threat Model)}
+		\begin{itemize}
+			\item \textbf{Chosen Plaintext Attack (CPA):} 
+				Il malintenzionato può scegliere liberamente quali messaggi far cifrare e osservare i ciphertext risultanti, come se avesse accesso a un oracolo di cifratura. Questo gli permette di per pattern nell'algoritmo.
+			\item \textbf{Chosen Ciphertext Attack (CCA):}
+				L'attaccante può far decifrare ciphertext arbitrari e osservare i plaintext risultanti, individuando ad esempio errori di padding per risalire alla chiave o al messaggio.
+		\end{itemize}
+
+	\subsubsection{Asset}
+		Come si evince dai possibili attacchi sopra definiti, l'asset del sistema è proprio l'insieme delle coppie Identità - voto. Questo perchè il requisito di anonimato stabilisce che non si possa risalire a questa associazione.
+\divider
  
 \subsection{Requisiti del sistema e priorità}
-In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
+	In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
+	
+	\begin{table}[H]
+		\centering
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
+			\hline
+			\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
+			Alta \\
+			\hline
+			\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
+			\hline
+			\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
+			\hline
+			\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
+			\hline
+			\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
+			\hline
+			\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
+			\hline
+			\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
+			\hline
+			\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
+			\hline
+			\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
+			\hline
+		\end{tabular}
+		\caption{Requisiti di sicurezza del sistema}
+		\label{tab:requisiti}
+	\end{table}
 
-\begin{table}[H]
-	\centering
-	\renewcommand{\arraystretch}{1.3}
-	\begin{tabular}{|c|c|c|}
-		\hline
-		\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
-		\hline
-		\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
-		Alta \\
-		\hline
-		\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
-		\hline
-		\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
-		\hline
-		\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
-		\hline
-		\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
-		\hline
-		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
-		\hline
-		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
-		\hline
-		\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
-		\hline
-		\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
-		\hline
-	\end{tabular}
-	\caption{Requisiti di sicurezza del sistema}
-	\label{tab:requisiti}
-\end{table}
-
+\divider
 
 \subsection{Assunzioni del sistema}
+	
