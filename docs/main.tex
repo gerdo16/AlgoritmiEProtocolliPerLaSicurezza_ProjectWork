@@ -1,15 +1,19 @@
 \documentclass[11pt]{article}
-
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage[utf8]{inputenc}
 \usepackage{geometry} 
-\usepackage{amsmath,amsthm,amssymb,graphicx,mathtools,tikz,hyperref,multicol,cancel,enumitem,booktabs,float,pgfplots,multirow,mathrsfs,textcomp,gensymb,soul,changepage,threeparttable}
+\usepackage{amsmath,amsthm,amssymb,graphicx,mathtools,tikz,hyperref,multicol,cancel,enumitem,booktabs,float,pgfplots,multirow,mathrsfs,textcomp,gensymb,changepage,threeparttable}
 \usepackage[italian]{babel}
 \usepackage{hyphenat}
 
-\usepackage[table,xcdraw]{xcolor} % Per i colori nelle righe
+
 \usepackage{booktabs}            % Per linee di tabella professionali
-\usepackage{tabularx}           % Per tabelle flessibili
+\usepackage[table]{xcolor}
+\usepackage{float}
+\usepackage{colortbl}
 \usepackage{bm}
+%\usepackage{soul}
 \definecolor{headergray}{HTML}{EFEFEF}
 \definecolor{rowgray}{HTML}{F9F9F9}
 
@@ -36,6 +40,7 @@
 \newcommand{\vbrack}[1]{\langle #1\rangle}
 \newcommand{\qRa}{\quad \Rightarrow \quad}
 \newcommand{\smaca}[1]{\textbf{\textsc{#1}}}
+\newcommand{\desc}[1]{\parbox{8cm}{\vspace{0.4em}#1\vspace{0.4em}}}
 
 \newenvironment{theorem}[2][Teorema]{\begin{trivlist}
 		\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}

@@ -15,63 +15,44 @@ L'attore è anche incaricato di registrare correttamente i voti e di garantire c
 Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
 
 \paragraph{CA :} 
-
+aiutoo
 
 \subsection{Threat model e Asset}
-
-
+aiutoo
+ 
 \subsection{Requisiti del sistema e priorità}
+In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
+
 \begin{table}[H]
 	\centering
-	\small
-	\renewcommand{\arraystretch}{1.4} % Aumenta l'altezza delle righe per leggibilità
-	\begin{tabularx}{\textwidth}{l X c c c}
-		\toprule
-		\rowcolor{headergray}
-		\textbf{Classe} & \textbf{Metodo (Tipo)} & \textbf{Complessità} & $\bm{WMC_{classe}}$ & $\bm{WMC_{classe}}$ \\ 
-		\midrule
-		
-		\textbf{Library} & Library() \textit{\footnotesize (C)} & Low & 1 & 11\\
-		& searchBooks(...) \textit{\footnotesize (I)} & Average & 9 \\
-		& viewUsers() \textit{\footnotesize (S)} & Low & 1 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{Book} & Book(...) \textit{\footnotesize (C)} & Low & 1 & 1 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{Reservation} & Reservation(...) \textit{\footnotesize (C)} & Average & 4 & 4 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{User} & User(...) \textit{\footnotesize (C)} & Low & 1 & 57 \\
-		& register(...) \textit{\footnotesize (M)} & High & 20 \\
-		& login(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& logout(...) \textit{\footnotesize (M)} & High & 20 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{Staff} & Staff() \textit{\footnotesize (C)} & Low & 1 & 102 \\
-		& addBook(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& updateBook(...) \textit{\footnotesize (M)} & High & 20 \\
-		& removeBook(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& viewAllReservations() \textit{\footnotesize (S)} & Low & 1 \\
-		& approveReservation(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& cancelReservation(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& sendReminder(...) \textit{\footnotesize (M)} & Average & 16 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{Reg. User} & RegisteredUser(...) \textit{\footnotesize (C)} & Low & 1 & 46 \\
-		& reserveBook(...) \textit{\footnotesize (M)} & High & 20 \\
-		& returnBook(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& viewReservedBooks() \textit{\footnotesize (I)} & Average & 9 \\
-		\addlinespace[0.5em] \hline \addlinespace[0.5em]
-		
-		\textbf{Admin} & Administrator() \textit{\footnotesize (C)} & Low & 1 & 53 \\
-		& manageUsers(...) \textit{\footnotesize (M)} & High & 20 \\
-		& assignRole(...) \textit{\footnotesize (M)} & Average & 16 \\
-		& deleteUser(...) \textit{\footnotesize (M)} & Average & 16 \\
-		
-		\bottomrule
-	\end{tabularx}
-	\caption{Analisi dettagliata WMC per classi e metodi (Legenda: C=Constructor, S=Selector, M=Modifier, I=Iterator).}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
+		\hline
+		\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
+		Alta \\
+		\hline
+		\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
+		\hline
+		\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
+		\hline
+		\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
+		\hline
+		\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
+		\hline
+		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
+		\hline
+		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
+		\hline
+		\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
+		\hline
+		\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
+		\hline
+	\end{tabular}
+	\caption{Requisiti di sicurezza del sistema}
+	\label{tab:requisiti}
 \end{table}
+
 
 \subsection{Assunzioni del sistema}
