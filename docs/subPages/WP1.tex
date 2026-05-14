@@ -4,8 +4,8 @@
 	L'utente è l'entità del sistema che rappresenta l'elettore legittimato a votare. Quindi il suo obiettivo è quello di contattare il Server per inviare il proprio voto, ossia la sua preferenza sul referendum binario, scegliendo tra \textit{"SI"} e \textit{"NO"}.\\
 	L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
 	Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
-	L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti l'utente perde la possibilità di votare e si compromette il sistema.\\
-	Quindi tale elettore legittimato deve avere una prova della propria identità, in modo tale da poter dimostrare al Server di essere un utente legittimo.
+	L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti perde la possibilità di votare e si compromette il sistema.\\
+	Quindi tale elettore deve avere una prova della propria identità, in modo da poter dimostrare al Server di essere un utente legittimo.
 
 \paragraph{Server (S):}
 	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
@@ -18,7 +18,7 @@
 	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
 
 \paragraph{Certification Authority (CA):}
-	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa parte del sistema è assunta, per definizione, come fidata.
+	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto.
 	
 
 \divider
@@ -106,4 +106,11 @@
 \divider
 
 \subsection{Assunzioni del sistema}
+	
+\subsubsection{Assunzioni sugli attori}
+
+\subsubsection{Assunzioni sul threat model}
+
+\subsubsection{Assunzioni sui requisiti}
+	
 	
