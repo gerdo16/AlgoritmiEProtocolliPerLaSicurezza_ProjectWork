@@ -16,7 +16,7 @@ Garantisce l'autenticità dei destinatari e prevenire attacchi MIM.
 2. A riceve il packet e agisce come un proxy di sicurezza:
     1. Decifrazione: Usa $sk_A$ per aprire il pacchetto e ottiene quindi $(\sigma \| c\| Cert(U))$
     2. A prende Cert(U) e contatta la CA per verificarlo
-    3. A verifica sul database che l'utente non abbia già votato, controllando se era già presente l'hash del suo certificato.
+    3. A verifica sul database che l'utente non abbia già votato, controllando se era già presente l'hash della sua chiave pubblica (presente nel certificato): ID dell'utente.
     4. Verifica l'identità di U e l'integrità con la firma digitale: A controlla che $V_{pk_U}(c, \sigma) = 1$
     5. A elimina DEFINIIVAMENTE $\sigma$ e Cert(U), interrompendo il legame tra identità e voto
     6. A invia solo $c = \text{Enc}_{pk_S}(v)$ al Server S
