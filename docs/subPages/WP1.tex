@@ -11,7 +11,8 @@
 	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
 	Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
 	L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-	L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.
+	L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.  \\
+	Considerato il limitato livello di criticità del contesto di votazione, l'entità server viene considerata come parzialmente affidabile. Assumiamo quindi che il suo eventuale gestore non manometta i voti registrati. In questo senso non modifica i voti già esistenti, non ne inserisce di fittizi e non ne elimina di già registrati. 
 
 \paragraph{Authenticator (A):}
 	L'Authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
@@ -71,6 +72,41 @@
 \divider
  
 
+\subsection{Requisiti del sistema e priorità}
+In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
+		\hline
+		\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
+		Alta \\
+		\hline
+		\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
+		\hline
+		\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
+		\hline
+		\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
+		\hline
+		\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
+		\hline
+		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
+		\hline
+		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
+		\hline
+		\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
+		\hline
+		\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
+		\hline
+	\end{tabular}
+	\caption{Requisiti di sicurezza del sistema}
+	\label{tab:requisiti}
+\end{table}
+
+\divider
 
 
 	
