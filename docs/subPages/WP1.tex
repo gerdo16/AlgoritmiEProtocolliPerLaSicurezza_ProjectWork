@@ -14,11 +14,12 @@
 	L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.
 
 \paragraph{Authenticator (A):}
-	L'authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
-	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione.
+	L'Authenticator è l'entità che si interpone tra lo user che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
+	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra lo user e il server per il processo di votazione. \\
+	L’Authenticator viene assunto come entità fidata del sistema. Considerato il contesto applicativo universitario e il limitato livello di criticità del processo di voto, si ritiene ragionevole escludere la presenza di gestori disonesti tali da compromettere tale entità.
 
 \paragraph{Certification Authority (CA):}
-	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto.
+	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa entità è, per definizione, una parte fidata del sistema.
 	
 
 \divider
@@ -69,48 +70,8 @@
 		Come si evince dai possibili attacchi sopra definiti, l'asset del sistema è proprio l'insieme delle coppie Identità - voto. Questo perchè il requisito di anonimato stabilisce che non si possa risalire a questa associazione.
 \divider
  
-\subsection{Requisiti del sistema e priorità}
-	In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
-	
-	\begin{table}[H]
-		\centering
-		\renewcommand{\arraystretch}{1.3}
-		\begin{tabular}{|c|c|c|}
-			\hline
-			\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
-			\hline
-			\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
-			Alta \\
-			\hline
-			\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
-			\hline
-			\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
-			\hline
-			\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
-			\hline
-			\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
-			\hline
-			\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
-			\hline
-			\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
-			\hline
-			\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
-			\hline
-			\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
-			\hline
-		\end{tabular}
-		\caption{Requisiti di sicurezza del sistema}
-		\label{tab:requisiti}
-	\end{table}
 
-\divider
 
-\subsection{Assunzioni del sistema}
-	
-\subsubsection{Assunzioni sugli attori}
 
-\subsubsection{Assunzioni sul threat model}
-
-\subsubsection{Assunzioni sui requisiti}
 	
 	

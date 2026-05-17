@@ -1,56 +1,35 @@
-\subsection{RISOLUZIONE AL Threat model (GODO TANTISSIMO)}
-	
-	\subsubsection{Attacchi all'Autenticità e Identità}
-	    \begin{itemize}
-	        \item \textbf{Impersonificazione dell'Utente (Identity Theft):}  L'attaccante tenta di votare spacciandosi per un elettore legittimo, quindi tenta di autenticarsi con l'Authenticator per conto di un elettore legittimo e votare al suo posto, compromettendo l'origine di quel voto. \\
-	        Fallisce perché A richiede la firma digitale $\sigma$ generata con la chiave privata $sk_U$ e il relativo $Cert(U)$ valido. Senza la chiave privata dell'utente, l'attaccante non può superare la fase di verifica di A, anche se l'attaccante possiede il certificato dell'utente legittimo che vuole impersonare.
-	        
-	        \item \textbf{Impersonificazione del Authenticator (Spoofing):}
-	        Il malintenzionato crea un Authenticator fittizio per catturare le richieste di votazione da parte di utenti legittimi e quindi può annullare delle votazioni o sostituire il voto con un altro a sua scelta.\\
-	        Fallisce perché lo User verifica i certificati $Cert(A)$ e $Cert(S)$ tramite la CA prima di inviare dati. Se il certificato non è firmato dalla CA fidata, il client interrompe la connessione.
-	        
-	        \item \textbf{Impersonificazione del Server (Spoofing):}
-	        Il malintenzionato crea un Server fittizio in modo da ricevere i voti degli utenti e annullarli oppure modificarli.\\
-	        Fallisce per lo stesso motivo dell'impersonificazione di A: lo User verifica i certificati $Cert(A)$ e $Cert(S)$ tramite la CA prima di inviare dati. Se il certificato non è firmato dalla CA fidata, il client interrompe la connessione.
-	    \end{itemize}
-	
-	\subsubsection{Attacchi all'Integrità (Attivi)}
-	    \begin{itemize}
-	        \item \textbf{Man-in-the-Middle (MIM):} L'attaccante intercetta il pacchetto del voto e modifica la preferenza di voto nel cifrato, quindi manipola la comunicazione tentando di compromettere la confidenzialità e l'integrità.\\
-	        L'integrità è garantita su due livelli. Nel primo tratto ($U \to A$), lo schema StE prevede la firma $\sigma$ di $U$ sul cifrato $c$ che rende vana ogni modifica (l'hash del pacchetto non corrisponderebbe più). Infatti quando A riceve il pacchetto da U e nota che la firma non è valida, scarta il pacchetto senza inoltrarlo a S e il voto non verrà registrato.\\
-	        Nel secondo tratto ($A \to S$), lo schema EtS tra A e S protegge il dato da ulteriori manomissioni. Infatti se un attaccante modifica il cifrato o la firma, S verificherà la firma prima di tentare la decifrazione e se la firma è invalida, il pacchetto viene scartato.
-	
-	        \item \textbf{Replay Attack:} Un utente o l'attaccante intercetta un voto valido e lo invia più volte per compromettere il conteggio.\\
-	        Fallisce perchè A tiene traccia dei certificati (o degli hash degli stessi) che hanno già votato. Quindi ogni ulteriore invio con lo stesso certificato viene scartato, soddisfacendo il requisito di unicità.
-	    \end{itemize}
-	
-	\subsubsection{Attacchi all'anonimato}
-	    \begin{itemize}
-	        \item \textbf{Eavesdropping (Intercettazione Passiva):}
-	        Similmente all'attacco MIM, l'attaccante intercetta il pacchetto e legge i dati che transitano sulla rete, quindi legge il voto con l'obiettivo di compromettere l'anonimato.\\
-	        Fallisce perchè tutti i dati sono protetti da doppio strato di cifratura asimmetrica. L'attaccante vede solo bit casuali grazie agli schemi di cifratura (RSA-OAEP) che garantiscono l'indistinguibilità del cifrato, quindi non può risalire al voto e tantomeno all'identità dell'elettore.
-	        
-	        \item \textbf{Authenticator Curioso (Insider Threat su A):} Il gestore dell'Authenticator prova a vedere cosa ha votato un utente di cui conosce l'identità.\\
-	        Fallisce perché il voto è cifrato con la chiave pubblica del Server $pk_S$. $A$ possiede solo la propria chiave privata $sk_A$, che non è sufficiente per decifrare il cuore del pacchetto ($c$) per prelevare l'informazione del voto.
-	        
-	        \item \textbf{Server Curioso (Insider Threat su S):} Il gestore del Server prova a risalire a chi ha espresso un determinato voto.\\
-	        Fallisce perché $A$ ha effettuato una rimozione definitiva della firma $\sigma$ e del certificato $Cert(U)$ prima di inoltrare il voto a $S$. Quest'ultimo riceve solo un insieme di voti anonimi provenienti da un mittente fidato, ossia $A$.
-	        
-	        \item \textbf{Analisi del Traffico:} L'attaccante osserva la dimensione dei pacchetti per intuire il voto.\\
-	        Poiché si usa la cifratura asimmetrica con padding (OAEP), la lunghezza del ciphertext è fissa indipendentemente dal contenuto del voto ("Sì" o "No" producono stringhe della stessa lunghezza).
-	    \end{itemize}
-	
-	\subsubsection{Attacchi Crittografici (Threat Model)}
-	    \begin{itemize}
-	        \item \textbf{Chosen Plaintext Attack (CPA):} 
-	            Il malintenzionato può scegliere liberamente quali messaggi far cifrare e osservare i ciphertext risultanti, come se avesse accesso a un oracolo di cifratura. Questo gli permette di per pattern nell'algoritmo.\\
-	            Fallisce per entrambe le tratte ($U \to A$ e $A \to S$) perché si usano rispettivamente gli schemi StE e EtS, che offrono entrambi sicurezza contro CPA.
-	        \item \textbf{Chosen Ciphertext Attack (CCA):}
-	            L'attaccante può far decifrare ciphertext arbitrari e osservare i plaintext risultanti, individuando ad esempio errori di padding per risalire alla chiave o al messaggio.\\
-	            Fallisce solo in parte perchè nella tratta $A \to S$ si usa lo schema EtS che garantisce una sicurezza CCA per questo tratto. Tuttavia, nella tratta $U \to A$ si usa lo schema StE che è sicuro solo contro CPA. Quindi, se un attaccante riesce a far decifrare ciphertext arbitrari da A, potrebbe potenzialmente risalire alla chiave privata di U o al messaggio. Tuttavia, questo scenario è meno probabile perché l'attaccante dovrebbe avere accesso diretto ad A per poter effettuare decifrature arbitrarie.
-	    \end{itemize}
-	    
-	    
-	\subsubsection{Attacco da risolvere}
-		Sistema vulnerabile all'analisi del traffico temporale: se A inoltra il voto a S istantaneamente, un osservatore esterno che vede U inviare un pacchetto ad A e, un millisecondo dopo, A inviare un pacchetto a S, può dedurre il legame. e quindi un attaccante in questo modo potrebbe scoprire che un certo utente ha appena votato senza sapere il voto ovviamente.\\
-		Soluzione: A può accumulare i voti tipo in un buffer e inviarli a S in blocchi o in ordine casuale.
+\subsection{Requisiti del sistema e priorità}
+In caso di attacchi o minacce descritti nella sezione precedente, si vogliono preservare i seguenti requisiti di sicurezza. Ogni requisito è associato a un livello di priorità, il quale indica il grado di importanza attribuito alla proprietà considerata nell’ambito del sistema progettato. 
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Requisito} & \textbf{Descrizione} & \textbf{Priorità} \\
+		\hline
+		\textbf{Unicità} & \desc{Un elettore certificato è in grado di votare una sola volta.} &
+		Alta \\
+		\hline
+		\textbf{Segretezza} & \desc{Il voto dell'elettore non può essere rivelato.} & Alta \\
+		\hline
+		\textbf{Autenticità} & \desc{Solo un elettore certificato può votare.} & Alta \\
+		\hline
+		\textbf{Integrità} & \desc{I voti non possono essere modificati o rimossi da nessuno.} & Alta \\
+		\hline
+		\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
+		\hline
+		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
+		\hline
+		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
+		\hline
+		\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
+		\hline
+		\textbf{Revocabilità o sostituzione del voto} & \desc{Un elettore è in grado di ritirare o modificare il proprio voto.} & Bassa \\
+		\hline
+	\end{tabular}
+	\caption{Requisiti di sicurezza del sistema}
+	\label{tab:requisiti}
+\end{table}
+
+\divider
