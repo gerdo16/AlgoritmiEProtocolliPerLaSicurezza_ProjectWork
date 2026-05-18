@@ -38,3 +38,20 @@ Garantisce l'autenticità dei destinatari e prevenire attacchi MIM.
 - Anonimato: basato sull'assunzione che A e S non si scambiano informazioni di identità degli elettori.
 
 **S possiede il contenuto ma non l'origin e A possiede l'origine ma non il contenuto.** GODO.
+
+# Problema per il Traffico Temporale
+Al punto 2.1, l'utente invia $C_{final} = \text{Enc}_{pk_A}(\sigma \| c \| \text{Cert}(U))$. Quando $A$ decifra il pacchetto (punto 2.2), anziché inoltrare immediatamente $c$ al Server $S$, A usa il suo buffer che è una mappa temporanea.
+
+Dal punto di vista crittografico, se un attaccante estrae la mappa dalla RAM di $A$ durante le elezioni, si trova davanti a questa struttura:
+$$\text{Mappa:}\ \text{ID}_U=\text{Hash}(pk_U) \to c$$
+Dove $c = \text{Enc}_{pk_S}(v)$. Poiché l'attaccante (e $A$ stesso) non possiede la chiave privata del server ($sk_S$), il contenuto del voto $v$ rimane matematicamente segreto.
+
+Quindi A effettua uno shuffle degli elementi di questa mappa e poi li inoltra a S dopo un certo tempo casuale ma non troppo lungo. Quindi A invia a caso uno dei voti cifrati $c$ al server $S$  ovviamente senza sull'ID dell'utente, in questo modo quando S risponde con un ACK ad A, quest'ultimo saprà esattamente quale voto è stato accettato da S, in questo modo potrà inviare un ACK all'utente U che ha inviato quel voto, senza sapere però quale voto è stato accettato da S e senza che S sappia quale voto è stato inviato da U. 
+
+# Verificabilità Individuale e Struttura dell'Hash Table
+Abbiamo detto che usiamo un'hash table per tenere traccia degli utenti che hanno già votato, la chave è l'hash della chiave pubblica di U come ID. Si può pensare di lasciare vuoto il valore associato a questa chiave, però si potrebbe costruire in questo modo:
+$$\text{HashTable:}\ \text{ID}_U=\text{Hash}(pk_U) \to Enc_{pk_U}(v)$$
+Al massimo un attaccante che compromette A può scoprire chi ha votato (facendo un attacco a dizionario sugli hash delle chiavi pubbliche note degli studenti), ma non potrà mai scoprire COSA l'utente ha votato, perchè serve la chiave segreta di U per decifrare: $Enc_{sk_U}(Enc_{pk_U}(v))=v$
+Questo però solo se RSA è probabilisticoco, altrimenti se è deterministico, allora l'attaccante potrebbe costruire un dizionario di voti cifrati per ogni possibile voto (solo SI e NO) e confrontarli con i valori presenti nella hash table, riuscendo così a risalire al voto di ogni utente. Infatti possiamo usare RSA con padding OAEP che è probabilistico.
+
+Questo implica che in $C_{final}$ si deve mandare anche $Enc_{pk_U}(v)$ come ulteriore elemento.
