@@ -48,5 +48,70 @@
 
 
 \subsection{Fase trasmissione voto}
-
-
+	Una volta che lo user ha verificato la validità del certifiacto dell'Authenticator e del Server nella fase precedente, ora usa sia la chiave pubblica di A ($pk_{A}$) che di S ($pk_{S}$) per costruire il primo messaggio di questa fase.\\
+	
+	La fase di trasmissione voto permette di soddisfare il requisito di efficienza, in quanto l'elettore invia un messaggio all'Authenticator che non si compone solo del voto $v$, ma anche del proprio certificato Cert(U). In questo modo la prima operazione che l'Authenticator effettua, quando ricevere questo pacchetto da $U$, è la verifica del certificato dell'entità, per garantire che il voto proviene da un elettore legittimato.\\
+	
+	Questa fase prevede una serie di scambi di messaggi tra le quattro entità coinvolte nel protocollo in modo da garantire una registrazione del voto dell'elettore in sicurezza.
+	
+	
+	\subsubsection{U $\to$ A: inoltro del certificato utente e del voto}
+		Lo schema di cifratura asimmetrico che si segue in questo primo scambio di messaggi è esattamente Sign-then-Encrypt, in aggiunta a una cifratura iniziale e all'inoltro del certificato utente:
+		
+		\begin{enumerate}
+			\item Scelta del voto: L'utente sceglie il valore del voto, quindi crea
+			$$ v\in\{"SI","NO"\} $$
+			
+			\item Cifratura interna: L'utente cifra il voto con la chiave pubblica di S, creando in questo modo il seguente chipertext:
+			$$ c = \text{Enc}_{pk_S}(v) $$
+			Il contenuto di questo chipertext, ossia il voto in sè, è leggibile solo e soltanto dal Server in quanto unico possessore della sua chiave privata $sk_{S}$. Quindi nessuna entità potrà leggere questo voto, in particolare l'Authenticar.
+			
+			\item Firma del cifrato: Questa firma è il primo step dello schema Sign-then-Encrypt, infatti prevede che l'utente firmi il messaggio che vuole inviare all'Authenticator, ossia il chipertext del voto ($c$) e non il semplice voto in chiaro:
+			$$ \sigma = \text{Sign}_{sk_U}(c) $$
+			
+			\item Cifratura esterna: L'utente completa il pacchetto con questa cifratura esterna, ed è il secondo e ultimo step dello schema Sign-then-Encrypt, infatti prevede di cifrare la firma creata allo step precedente e il messaggio stesso che è stato firmato, ossia il chipertext del voto ($c$). Quindi il messaggio da cifrare è la seguente concatenazione: $(\sigma\|c)$.\\
+			Poichè l'elettore si deve dimostrare legittimato a votare, aggiunge al messaggio anche il suo certificato Cert(U), creando complessivamente la seguente concatenazione: $(\sigma\|c\|\text{Cert(U)})$. Quindi si completa lo schema Sign-then-Encrypt cifrando questo blocco con la chiave pubblica del destinatario (A), producendo il seguente messaggio finale:
+			$$ C_{final} = \text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)}) $$
+			In questo modo solo l'Authenticator potrà decifrare questo chipertext esterno $ C_{final} $.
+		\end{enumerate}
+		
+		Il protocollo sicuro non prevede lo schema Encrypt-then-Sign, bensì questo schema Sign-then-Encrypt modificato perchè quest'ultimo garantisce l'anonimato per chiunque intercetti il pacchetto, accettando il compromesso che questo messaggio (U $\to$ A) è solo CPA-secure e non CCA-secure a differenza dello schema Encrypt-then-Sign. Il compromesso riguarda il fatto che lo schema Encrypt-then-Sign, pur essendo CCA-secure, non garantisce l'anonimato per gli intercettatori.\\
+		
+		Lo schema Sign-then-Encrypt modificato prevede che U effettui una cifratura iniziale, in questo modo quando A riceverà il pacchetto potrà sapere al limite che l'utente U ha votato, grazie al certificato che deve verificare, ma non potrà in alcun modo leggere il voto. Questo perchè $ c = \text{Enc}_{pk_S}(v) $ può decifrarlo solo e soltanto S.
+		
+		
+	\subsubsection{A $\rightleftarrows$ CA: Verifica del certificato utente}
+		In questo scambio di messaggi A verifica che l'utente sia effettivamente un elettore legittimato e non un malintenzionato.
+		\begin{enumerate}
+			\item Decifrazione: A riceve il messaggio $ C_{final} = \text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)}) $, inviato da U nello step precedente. l'authenticator ora deve rispettare lo schema asimmetrico Sign-then-Encrypt in ricezione, pertanto la prima operazione che deve effettuare è la decifrazione di $ C_{final}$ con la propria chiave privata $sk_A$, ottenendo in questo modo il messaggio composto dalle due concatenazioni:
+			$$ \text{Dec}_{sk_A}(C_{final}) = \text{Dec}_{sk_A}(\text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)})) = \boxed{(\sigma \| c\| \text{Cert(U)})} $$
+			
+			\item Prima di procedere alla verifica della firma seguendo lo schema Sign-then-Encrypt, A deve prima verificare la legittimità dell'elettore, estraendo il certificato Cert(U) dal blocco $(\sigma \| c\| \text{Cert(U)})$ e contattando la CA di riferimento.\\
+			Poichè la CA di riferimento si assume essere la stessa per semplicità, l'Authenticator possiede già la chiave pubblica della CA quindi non è necessario che A contatti direttamente la CA per verificare la firma. Infatti è sufficiente effettuare la verifica del certificato utente firmato dalla CA, quindi eseguire la verifica $V$. Si deve considerare che il certificato utente è firmato dalla CA quindi si ha effettivamente: $\text{Cert}_{signed}(U)=(\text{Cert}(U),\ \sigma)$. La verifica da effettuare è la seguente:
+			$$ V_{pk_{CA}}(H(\text{Cert}(U)),\ \sigma) $$
+			Ovviamente se la CA di riferimento fosse stata diversa e l'Authenticator non avesse avuto la chiave pubblica della CA, A avrebbe dovuto richiederla per verificare il certificato.
+		\end{enumerate}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
