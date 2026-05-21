@@ -1,11 +1,47 @@
 \subsection{Fase preliminare del sistema}
+
 \begin{enumerate}
-	\item Il Server crea una chiave 
-	\item 
+	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority).
+	\item \textbf{Certificazione del Server}: 
+		\begin{enumerate}
+			\item Il server genera una coppia di chiavi (privata $sk_S$, pubblica $pk_S$).
+			\item Il server chiede alla CA di certificare il messaggio (ID, $pk_S$), in cui l'ID è il nome DNS del server.
+			\item La CA verifica che il server appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
+			\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_S)$.
+			\item La CA unisce firma e dati, costruendo il certificato Cert(S) = ($\sigma$, ID, $pk_S$).
+			\item La CA restituisce il certificato al server.
+		\end{enumerate}
+	\item \textbf{Certificazione dell'Authority}:
+		\begin{enumerate}
+			\item L'authority genera una coppia di chiavi (privata $sk_A$, pubblica $pk_A$).
+			\item L'authority chiede alla CA di certificare il messaggio (ID, $pk_A$), in cui l'ID è il nome DNS dell'authority.
+			\item La CA verifica che l'authority appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stata approvata dagli amministratori del sistema. 
+			\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_A)$.
+			\item La CA unisce firma e dati, costruendo il certificato Cert(A) = ($\sigma$, ID, $pk_A$).
+			\item La CA restituisce il certificato all'authority.
+		\end{enumerate}
+	\item \textbf{Scambio dei certificati}:
+		\begin{itemize}
+			\item Il server trasmette il suo certificato Cert(S) all'authority,
+			\item L'authority trasmette il suo certificato al server.
+		\end{itemize}	
+	\item \textbf{Eventuale revoca dei certificati}:
+		\begin{itemize}
+			\item Se viene revocato il certificato del server, viene ripetuta la fase di certificazione del server e scambio dei certificati.
+			\item Se viene revocato il certificato dell'authority, viene ripetuta la fase di certificazione dell'authority e scambio dei certificati.
+		\end{itemize}
 \end{enumerate}
 
 
 \subsection{Fase certificato utente}
+\begin{enumerate}
+	\item L'utente genera una coppia di chiavi (privata $sk_U$, pubblica $pk_U$).
+	\item L'utente chiede alla CA di certificare il messaggio (ID, $pk_U$), in cui l'ID è la matricola universitaria dell'utente. (qualcuno potrebbe fingersi qualcun altro).
+	\item La CA verifica che la matricola ricevuta è valida.
+	\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_U)$.
+	\item La CA unisce firma e dati, costruendo il certificato Cert(U) = ($\sigma$, ID, $pk_U$).
+	\item La CA restituisce il certificato all'utente.
+\end{enumerate}
 
 
 \subsection{Fase handshake}
