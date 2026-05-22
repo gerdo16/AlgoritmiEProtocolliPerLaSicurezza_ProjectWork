@@ -1,0 +1,109 @@
+\begin{tikzpicture}[
+	actor/.style={
+		rectangle, rounded corners=6pt,
+		minimum width=2.4cm, minimum height=1cm,
+		draw, thick,
+		font=\small\bfseries,
+		text centered
+	},
+	utente/.style={actor, fill=blue!10, draw=blue!60},
+	ca/.style={actor, fill=orange!15, draw=orange!60},
+	auth/.style={actor, fill=green!10, draw=green!60},
+	server/.style={actor, fill=red!10, draw=red!60},
+	msg/.style={-{Stealth[length=7pt]}, thick},
+	lbl/.style={font=\scriptsize, fill=white, inner sep=2pt, midway},
+	stepnum/.style={circle, draw=gray!60, fill=gray!15, font=\scriptsize\bfseries,
+		inner sep=1.5pt, minimum size=15pt}
+	]
+	
+	% ─── Attori ──────────────────────────────────────────────────────────────────
+	\node[utente]  (U)                      {Utente};
+	\node[ca]      (CA)  [right=2.8cm of U]  {CA};
+	\node[auth]    (A)   [right=2.8cm of CA] {Authenticator};
+	\node[server]  (S)   [right=2.8cm of A]  {Server};
+	
+	% ─── Lifelines ───────────────────────────────────────────────────────────────
+	\foreach \n in {U,CA,A,S}{
+		\draw[dashed, gray!50] (\n.south) -- ++(0,-12.8cm);
+	}
+	
+	% ─── Step 1: Registrazione ───────────────────────────────────────────────────
+	\node[stepnum] at ($(U.south)+(0,-0.85)$) {1};
+	\draw[msg, blue!60]
+	($(U.south)+(0,-1.3)$) -- node[lbl,above]{richiesta certificato}
+	($(CA.south)+(0,-1.3)$);
+	\draw[msg, orange!60]
+	($(CA.south)+(0,-1.7)$) -- node[lbl,above]{certificato}
+	($(U.south)+(0,-1.7)$);
+	
+	% ─── Step 2: Richiesta di voto ───────────────────────────────────────────────
+	\node[stepnum] at ($(U.south)+(0,-2.25)$) {2};
+	\draw[msg, blue!60]
+	($(U.south)+(0,-2.7)$) -- node[lbl,above]{richiesta di votazione}
+	($(A.south)+(0,-2.7)$);
+	
+	% ─── Step 3: Autenticazione ──────────────────────────────────────────────────
+	\node[stepnum] at ($(A.south)+(0,-3.15)$) {3};
+	\draw[msg, green!60]
+	($(A.south)+(0,-3.6)$) -- node[lbl,above]{permesso di accesso}
+	($(U.south)+(0,-3.6)$);
+	\draw[msg, blue!60]
+	($(U.south)+(0,-4.0)$) -- node[lbl,above]{certificato utente}
+	($(A.south)+(0,-4.0)$);
+	
+	% ─── Step 4: Abilitazione al voto ────────────────────────────────────────────
+	\node[stepnum] at ($(A.south)+(0,-4.6)$) {4};
+	\draw[msg, green!60]
+	($(A.south)+(0.1,-4.9)$) -- ++(0.7,0)
+	node[right, font=\scriptsize, text=green!60!black]{verifica credenziali}
+	-- ++(0,-0.45) -- ++(-0.7,0);
+	
+	% ─── Step 5: Invio del voto ──────────────────────────────────────────────────
+	\node[stepnum] at ($(U.south)+(0,-6.1)$) {5};
+	\draw[msg, blue!60]
+	($(U.south)+(0,-6.55)$) -- node[lbl,above]{voto}
+	($(A.south)+(0,-6.55)$);
+	\draw[msg, green!60]
+	($(A.south)+(0,-7.0)$) -- node[lbl,above]{inoltro voto}
+	($(S.south)+(0,-7.0)$);
+	
+	% ─── Step 6: Registrazione del voto ──────────────────────────────────────────
+	\node[stepnum] at ($(S.south)+(0,-7.7)$) {6};
+	\draw[msg, red!60]
+	($(S.south)+(0.1,-8.0)$) -- ++(0.65,0)
+	node[right, font=\scriptsize, text=red!70!black]{registra voto}
+	-- ++(0,-0.45) -- ++(-0.65,0);
+	
+	% ─── Step 7: Scrutinio finale ────────────────────────────────────────────────
+	\node[stepnum] at ($(S.south)+(0,-9.0)$) {7};
+	\draw[msg, red!60]
+	($(S.south)+(0.1,-9.35)$) -- ++(0.65,0)
+	node[right, font=\scriptsize, text=red!70!black]{calcola risultato}
+	-- ++(0,-0.45) -- ++(-0.65,0);
+	
+	% ─── Etichette laterali ──────────────────────────────────────────────────────
+	\foreach \y/\txt in {
+		-1.5/Registrazione,
+		-2.7/Richiesta di voto,
+		-3.8/Autenticazione,
+		-4.9/Abilitazione,
+		-6.55/Invio del voto,
+		-7.85/Reg. voto,
+		-9.45/Scrutinio
+	}{
+		\node[font=\tiny\itshape, gray, anchor=east] at ($(U.south)+(-0.2,\y)$) {\txt};
+	}
+	
+	% ─── Sfondi per fase ─────────────────────────────────────────────────────────
+	\begin{pgfonlayer}{background}
+		\fill[blue!4, rounded corners=4pt]
+		($(U.south)+(-1.25,-1.0)$) rectangle ($(CA.south)+(0.5,-2.0)$);
+		\fill[green!4, rounded corners=4pt]
+		($(U.south)+(-1.25,-2.4)$) rectangle ($(A.south)+(0.5,-5.6)$);
+		\fill[red!4, rounded corners=4pt]
+		($(U.south)+(-1.25,-6.2)$) rectangle ($(S.south)+(1.15,-8.7)$);
+		\fill[gray!6, rounded corners=4pt]
+		($(S.south)+(-0.2,-8.9)$) rectangle ($(S.south)+(1.15,-10.1)$);
+	\end{pgfonlayer}
+	
+\end{tikzpicture}

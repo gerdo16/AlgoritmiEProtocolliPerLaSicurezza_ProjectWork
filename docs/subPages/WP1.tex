@@ -1,3 +1,24 @@
+\subsection{Architettura generale del sistema}
+Il sistema di votazione è progettato per gestire un referendum binario in ambito universitario. Il processo di votazione si articola nelle seguenti fasi:
+
+\begin{enumerate}
+	\item \textbf{Registrazione:} l'Utente ottiene il suo certificato dalla CA.
+	\item \textbf{Richiesta di voto:} l'Utente effettua una richiesta di votazione all'Authenticator.
+	\item \textbf{Autenticazione: } Una volta fornito il permesso da parte dell'Authenticator, l'Utente può autenticarsi utilizzando il proprio certificato.
+	\item \textbf{Abilitazione al voto: } l'Authenticator verifica le credenziali dell'Utente e che non abbia già votato in precedenza (NEL WP2 QUESTA PARTE SARA' INTEGRATA ALLA SUCCESSIVA MA QUI NO SECONDO ME).
+	\item \textbf{Invio del voto: } l'Utente trasmette il suo voto all'Authenticator, il quale lo inoltra al Server.
+	\item \textbf{Registrazione del voto: } il Server registra il voto garantendo integrità, anonimato, autenticità e unicità.
+	\item \textbf{Scrutinio finale: } al termine della fase di votazione, il Server calcola il risultato finale del referendum.
+\end{enumerate}
+
+\begin{figure}[h]
+	\centering
+	\scalebox{0.85}{\input{./subPages/generalScheme.tex}}
+	\caption{Schema generale del protocollo di voto}
+\end{figure}
+
+
+
 \subsection{Attori del sistema}
 	Gli attori onesti inclusi nel sistema utilizzano il protocollo sicuro per completare il processo di votazione, e sono quattro.
 \paragraph{User (U):}
