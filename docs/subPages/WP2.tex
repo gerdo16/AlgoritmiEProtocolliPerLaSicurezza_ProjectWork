@@ -55,6 +55,7 @@
 	Questa fase prevede una serie di scambi di messaggi tra le quattro entità coinvolte nel protocollo in modo da garantire una registrazione del voto dell'elettore in sicurezza.
 	
 	
+	
 	\subsubsection{U $\to$ A: Preparazione pacchetto e inoltro certificato utente e voto}
 		Lo schema di cifratura asimmetrico che si segue in questo primo scambio di messaggi è esattamente Sign-then-Encrypt, in aggiunta a una cifratura iniziale e all'inoltro del certificato utente:
 		
@@ -78,6 +79,7 @@
 		Il protocollo sicuro non prevede lo schema Encrypt-then-Sign, bensì questo schema Sign-then-Encrypt modificato perchè quest'ultimo garantisce l'anonimato per chiunque intercetti il pacchetto, accettando il compromesso che questo messaggio (U $\to$ A) è solo CPA-secure e non CCA-secure a differenza dello schema Encrypt-then-Sign. Il compromesso riguarda il fatto che lo schema Encrypt-then-Sign, pur essendo CCA-secure, non garantisce l'anonimato per gli intercettatori.\\
 		
 		Lo schema Sign-then-Encrypt modificato prevede che U effettui una cifratura iniziale, in questo modo quando A riceverà il pacchetto potrà sapere al limite che l'utente U ha votato, grazie al certificato che deve verificare, ma non potrà in alcun modo leggere il voto. Questo perchè $ c = \text{Enc}_{pk_S}(v) $ può decifrarlo solo e soltanto S.
+		
 		
 		
 	\subsubsection{A $\rightleftarrows$ CA: Verifica certificato utente e validazione $C_{final}$}
@@ -112,6 +114,8 @@
 			\end{itemize}
 		\end{enumerate}	
 			
+			
+			
 	\subsubsection{A $\to$ S: Preparazione pacchetto e inoltro voto}
 		L'authenticator deve preparare un messaggio da inviare al Server per informarlo di un nuovo voto da registrare.
 		\begin{enumerate}
@@ -128,10 +132,19 @@
 			\item Adesso A è pronto per inviare ad S il voto firmato $(c_{A} \| \sigma_{A})$.
 		\end{enumerate}
 	
+	
+	
 	\subsubsection{S $\to$ A: Validazione pacchetto e risposta}
 		S riceve il messaggio del voto da A, ne verifica l'integrità e l'autenticità e poi prepara una risposta da inviare al mittente ossia A.
 		
-		
+		\begin{enumerate}
+			\item \textbf{Encrypt-then-Sign in ricezione:}
+		\end{enumerate}
+	
+	
+	
+	
+	
 	
 	
 	
