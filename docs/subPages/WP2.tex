@@ -76,16 +76,18 @@
 			In questo modo solo l'Authenticator potrà decifrare questo chipertext esterno $ C_{final} $.
 		\end{enumerate}
 		
-		Il protocollo sicuro non prevede lo schema Encrypt-then-Sign, bensì questo schema Sign-then-Encrypt modificato perchè quest'ultimo garantisce l'anonimato per chiunque intercetti il pacchetto, accettando il compromesso che questo messaggio (U $\to$ A) è solo CPA-secure e non CCA-secure a differenza dello schema Encrypt-then-Sign. Il compromesso riguarda il fatto che lo schema Encrypt-then-Sign, pur essendo CCA-secure, non garantisce l'anonimato per gli intercettatori.\\
+		Il protocollo applica lo schema Sign-then-Encrypt al cifrato $c$. Assumendo l'utilizzo di uno schema di cifratura asimmetrica robusto come RSA-OAEP viene garantito anche la sicurezza CCA. La scelta di posizionare la firma all'interno della cifratura più esterna è fondamentale per soddisfare il requisito di anonimato: un eavesdropper non può intercettare la firma $\sigma$ né il certificato dell'utente, prevenendo l'identificazione precoce dell'elettore.\\
 		
 		Lo schema Sign-then-Encrypt modificato prevede che U effettui una cifratura iniziale, in questo modo quando A riceverà il pacchetto potrà sapere al limite che l'utente U ha votato, grazie al certificato che deve verificare, ma non potrà in alcun modo leggere il voto. Questo perchè $ c = \text{Enc}_{pk_S}(v) $ può decifrarlo solo e soltanto S.
 		
 		
 		
 	\subsubsection{A $\rightleftarrows$ CA: Verifica certificato utente e validazione $C_{final}$}
-		In questo scambio di messaggi A verifica che l'utente sia effettivamente un elettore legittimato e non un malintenzionato.
+		In questo scambio di messaggi A verifica che l'utente sia effettivamente un elettore legittimato e non un malintenzionato.\\
+		L'authenticator deve prima applicare l'operazione di decifrazione e poi di verifica della firma digitale del messaggio inviato dallo user perchè deve seguire lo schema asimmetrico Sign-then-Encrypt in ricezione.
+		
 		\begin{enumerate}
-			\item \textbf{Decifrazione iniziale}: A riceve il messaggio $ C_{final} = \text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)}) $, inviato da U nello step precedente. l'authenticator ora deve rispettare lo schema asimmetrico Sign-then-Encrypt in ricezione, pertanto la prima operazione che deve effettuare è la decifrazione di $ C_{final}$ con la propria chiave privata $sk_A$, ottenendo in questo modo il messaggio composto dalle due concatenazioni:
+			\item \textbf{Decifrazione iniziale}: A riceve il messaggio $ C_{final} = \text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)}) $, inviato da U nello step precedente. l'authenticator ora deve rispettare lo schema, pertanto la prima operazione che deve effettuare è la decifrazione di $ C_{final}$ con la propria chiave privata $sk_A$, ottenendo in questo modo il messaggio composto dalle due concatenazioni:
 			$$ \text{Dec}_{sk_A}(C_{final}) = \text{Dec}_{sk_A}(\text{Enc}_{pk_A}(\sigma \| c\| \text{Cert(U)})) = \boxed{(\sigma \| c\| \text{Cert(U)})} $$
 			
 			\item \textbf{Verifica della legittimità dell'utente:} Prima di procedere alla verifica della firma seguendo lo schema Sign-then-Encrypt, A deve prima verificare la legittimità dell'elettore, estraendo il certificato Cert(U) dal blocco $(\sigma \| c\| \text{Cert(U)})$ e contattando la CA di riferimento.\\
@@ -99,14 +101,15 @@
 				\item Se invece $V=1$ significa che la verifica produce un risultato positivo, pertanto l'utente che ha richiesto la registrazione del proprio voto è effettivamente un utente legittimato, quindi in tal caso si può procedere con il passaggio successivo.
 			\end{itemize}
 			
-			\item \textbf{Verifica della firma e dell'integrità:} Una volta accertata la validità del certificato, l'Authenticator estrae la chiave pubblica dell'utente $pk_U$ da quest'ultimo e procede alla verifica della firma $\sigma$ sul cifrato $c$. L'operazione effettuata è $V_{pk_U}(c, \sigma)$. 
+			\item \textbf{Verifica della firma e dell'integrità:} Una volta accertata la validità del certificato, l'Authenticator estrae la chiave pubblica dell'utente $pk_U$ da quest'ultimo e procede alla verifica della firma $\sigma$ sul cifrato $c$, come secondo e ultimo step dello schema Sign-then-Encrypt. L'operazione effettuata è quindi la seguente verifica:
+			$$V_{pk_U}(c, \sigma)$$
 			\begin{itemize}
 				\item Se la firma non è valida ($V_{pk_U}(c, \sigma)=0$), il pacchetto viene scartato immediatamente. \textit{Questo passaggio è cruciale per prevenire attacchi in cui un malintenzionato tenta di inviare un pacchetto falso con il certificato di un altro utente per dedurre se quest'ultimo ha già votato. Senza la chiave privata $sk_U$, l'attaccante non può superare questo step.}
 				
-				\item Se la firma è valida ($V_{pk_U}(c, \sigma)=1$), A ha la certezza matematica che il messaggio provenga dal reale proprietario del certificato.
+				\item Se la firma è valida ($V_{pk_U}(c, \sigma)=1$), A ha la certezza matematica che il messaggio provenga dal reale proprietario del certificato e inoltre non è stato manipolato il messaggio perchè il contenuto si dimostra integro grazie alla firma.
 			\end{itemize}
 			
-			\item \textbf{Verifica dell'unicità del voto:} Solo dopo aver verificato con successo la firma, l'Authenticator controlla se l'utente ha già votato. A mantiene una collezione (implementata come Hash Table) le cui chiavi sono gli hash delle chiavi pubbliche degli utenti ($H(pk_U)$) che hanno già votato e il cui voto è stato registrato correttamente nel server.
+			\item \textbf{Verifica dell'unicità del voto:} Solo dopo aver verificato con successo la firma, l'Authenticator controlla se l'utente ha già votato. A mantiene una collezione (implementata come Hash Table, quindi come una mappa) le cui chiavi sono gli hash delle chiavi pubbliche degli utenti ($H(pk_U)$) che hanno già votato e il cui voto è stato registrato correttamente nel server. Invece il valore è il voto cifrato con la chiave pubblica dell'utente stesso TODOOOOOOOOOOOOOOOO
 			\begin{itemize}
 				\item Se l'hash è già presente, l'Authenticator notifica l'utente che ha già espresso la propria preferenza e scarta il pacchetto \textit{(mitigazione contro Replay Attack)}. Anche in questo caso A non procede con gli step successivi per registrare il voto ed elimina definitivamente tutte le informazioni inviate dall'utente (quindi firma e certificato).
 				
@@ -120,25 +123,45 @@
 		L'authenticator deve preparare un messaggio da inviare al Server per informarlo di un nuovo voto da registrare.
 		\begin{enumerate}
 			\item \textbf{Preparazione del messaggio per S:} Arrivati a questo punto l'authenticator ha ricavato l'informazione del voto cifrato $c$ dal $C_{final}$, e questo sarà il messaggio che deve inviare con uno schema asimmetrico Encrypt-then-Sign al server per l'invio del voto. Poichè il voto non è in chiaro bensì è cifrato con la chiave pubblica del server, singnifica che A non può leggere il contenuto, infatti si ricorda che il chipertext è il seguente: $c=\text{Enc}_{pk_S}(v)$.\\
-			Quindi A prepara il pacchetto per S secondo lo schema sopra detto. Quindi costruisce prima il cifrato interno, ossia $ c_{A}=\text{Enc}_{pk_S}(c) $ e poi lo firma con la propria chiave privata, producendo la seguente firma:
-			$$ \sigma_{A}=\text{Sign}_{sk_A}(c_{A}) =  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(c)) $$
-			In questo modo il messaggio finale è esattamente $(c_{A} \| \sigma_{A})$, il quale espandendolo evidenzia che conserva l'informazione del voto cifrato dall'utente nella fase iniziale:
-			\begin{align*}
-				\boxed{(c_{A} \| \sigma_{A})} &= (c_{A} \| \text{Sign}_{sk_A}(c_{A})) \\
-					&=(\text{Enc}_{pk_S}(c) \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(c)) \\
-					&= (\text{Enc}_{pk_S}( \underbrace{ \text{Enc}_{pk_S}(v)}_{\text{Creato da User}}) \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(c)) ) 
-			\end{align*}
+			Quindi A prepara il pacchetto per S secondo lo schema sopra detto. Quindi dovrebbe costruire prima il cifrato interno, ossia $ \text{Enc}_{pk_S}(c) = \text{Enc}_{pk_S}(\text{Enc}_{pk_S}(v)) $ e firmarlo. Tuttavia l'applicazione di un'ulteriore cifratura asimmetrica su un dato già cifrato risulterebbe inutile e ridondante, e quindi per rispettare il requisito di efficienza è possibile evitare di cifrare nuovamente e considerare direttamente che il messaggio cifrato è $c$.\\
+			Adesso con la propria chiave privata, A produce la seguente firma:
+			$$ \sigma_{A}=\text{Sign}_{sk_A}(c) =  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)) $$
+			In questo modo il messaggio finale è esattamente $(c \| \sigma_{A})$, il quale espandendolo evidenzia che conserva l'informazione del voto cifrato dall'utente nella fase iniziale:
+			$$ \boxed{(c \| \sigma_{A})} = (c \| \text{Sign}_{sk_A}(c)) = (\underbrace{ \text{Enc}_{pk_S}(v)}_{\text{Creato da User}} \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)) )$$
 			
-			\item Adesso A è pronto per inviare ad S il voto firmato $(c_{A} \| \sigma_{A})$.
+			\item \textbf{Buffer di inoltro:} Adesso A è pronto per inviare ad S il voto firmato $(c \| \sigma_{A})$.\\
+			Tuttavia non manda subito il pacchetto al server, bensì lo inserisce in un buffer temporaneo, ossia una mappa in memoria in cui associa temporaneamente l'identificativo dell'utente al rispettivo pacchetto, al fine di smistare correttamente in seguito le ricevute di ritorno (ACK del server).
+			$$ \text{Buffer: } [ID_U \to pck]=[\text{Hash}(pk_U) \to (c \| \sigma_{A})] $$
+			Quindi attende un certo intervallo di tempo, oppure il raggiungimento di un numero prestabilito di voti (batching), prima di inoltrarli al Server. Prima dell'invio effettivo, l'Authenticator estrae i pacchetti dalla mappa e ne effettua uno shuffle.\\
+			Questa contromisura è essenziale per mitigare le vulnerabilità legate all'analisi del traffico temporale (Timing Attack), impedendo a un osservatore passivo di correlare l'arrivo del pacchetto da U con la successiva trasmissione verso S.
+			
+			\item \textbf{Inoltro effettivo del voto a S:} Una volta prelevato dal buffer di inoltro uno degli item $(c \| \sigma_{A})$ associato all'ID dello user sorgente, può inviare il pacchetto $(c \| \sigma_{A})$ a S, conservando l'informazione che è stato mandato il voto dell'utente con quel determinato ID per poterlo inserire successivamente nella mappa degli utenti, dopo aver ricevuto l'ACK da parte del server.
 		\end{enumerate}
 	
 	
 	
 	\subsubsection{S $\to$ A: Validazione pacchetto e risposta}
-		S riceve il messaggio del voto da A, ne verifica l'integrità e l'autenticità e poi prepara una risposta da inviare al mittente ossia A.
+		S riceve il messaggio del voto da A, ne verifica l'integrità e l'autenticità e poi prepara una risposta da inviare al mittente ossia A.\\
+		Per gestire il pacchetto ricevuto da A, deve rispettare lo schema asimmetrico Encrypt-then-Sign in ricezione.
 		
 		\begin{enumerate}
-			\item \textbf{Encrypt-then-Sign in ricezione:}
+			\item \textbf{Integrità e autenticità del messaggio:} Il server riceve il pacchetto $(c \| \sigma_{A})$ e per rispettare lo schema asimmetrico usato, controlla prima la firma digitale quindi l'integrità del messaggio e l'autenticità dell'entità che l'ha mandato.\\
+			Quindi la prima operazione che effettua è la seguente verifica:
+			$$ V_{pk_A}(c, \sigma_{A}) $$
+			\begin{itemize}
+				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dall'authenticator, pertanto si scarta immediatamente il voto e si notifica il mittente che l'operazione è stata annullata.
+				
+				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dall'authenticator perchè solo lui conosce la propria chiave privata $sk_A$ che gli ha permesso di generare la firma digitale $\sigma_A$.
+			\end{itemize}
+			Questa è il primo step per lo schema Encrypt-then-Sign in ricezione, finalizzato a garantire che il voto provenga dall'intermediario autorizzato (l'authenticator).
+			
+			\item \textbf{Estrazione del voto:} Poiché l'Authenticator non ha applicato una seconda cifratura (per preservare l'efficienza), il Server può procedere direttamente alla decifrazione del messaggio $c$. S utilizza la propria chiave privata $sk_S$ per ottenere il plaintext $v$:
+			$$ v=\text{Dec}_{sk_S}(c)= \text{Dec}_{sk_S}(\text{Enc}_{pk_S}(v)) $$
+			In questo modo S ottiene la preferenza espressa dall'utente ("SI" o "NO") senza conoscere l'identità del votante, poiché $c$ gli è stato inoltrato da A in modo anonimizzato.
+			
+			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
+			
+			\item \textbf{ACK e Finalizzazione:} S invia all'Authenticator una ricevuta (ACK) indicante il completamento del processo. A questo punto, A inserisce definitivamente l'hash $H(pk_U)$ dell'elettore nella sua mappa per impedirne il doppio voto e inoltra l'ACK finale all'utente U.
 		\end{enumerate}
 	
 	
