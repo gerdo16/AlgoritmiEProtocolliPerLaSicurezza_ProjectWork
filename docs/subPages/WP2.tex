@@ -112,7 +112,8 @@
 			\end{itemize}
 		\end{enumerate}	
 			
-	\subsubsection{$A \to S$: Preparazione pacchetto e inoltro voto}
+	\subsubsection{A $\to$ S: Preparazione pacchetto e inoltro voto}
+		L'authenticator deve preparare un messaggio da inviare al Server per informarlo di un nuovo voto da registrare.
 		\begin{enumerate}
 			\item \textbf{Preparazione del messaggio per S:} Arrivati a questo punto l'authenticator ha ricavato l'informazione del voto cifrato $c$ dal $C_{final}$, e questo sarà il messaggio che deve inviare con uno schema asimmetrico Encrypt-then-Sign al server per l'invio del voto. Poichè il voto non è in chiaro bensì è cifrato con la chiave pubblica del server, singnifica che A non può leggere il contenuto, infatti si ricorda che il chipertext è il seguente: $c=\text{Enc}_{pk_S}(v)$.\\
 			Quindi A prepara il pacchetto per S secondo lo schema sopra detto. Quindi costruisce prima il cifrato interno, ossia $ c_{A}=\text{Enc}_{pk_S}(c) $ e poi lo firma con la propria chiave privata, producendo la seguente firma:
@@ -123,10 +124,14 @@
 					&=(\text{Enc}_{pk_S}(c) \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(c)) \\
 					&= (\text{Enc}_{pk_S}( \underbrace{ \text{Enc}_{pk_S}(v)}_{\text{Creato da User}}) \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(c)) ) 
 			\end{align*}
-			Adesso A è pronto per inviare questo voto ad S.
+			
+			\item Adesso A è pronto per inviare ad S il voto firmato $(c_{A} \| \sigma_{A})$.
 		\end{enumerate}
 	
-	\subsubsection{A $\to$ S: }
+	\subsubsection{S $\to$ A: Validazione pacchetto e risposta}
+		S riceve il messaggio del voto da A, ne verifica l'integrità e l'autenticità e poi prepara una risposta da inviare al mittente ossia A.
+		
+		
 	
 	
 	
