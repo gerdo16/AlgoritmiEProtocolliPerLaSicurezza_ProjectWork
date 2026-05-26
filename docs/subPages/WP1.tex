@@ -5,7 +5,7 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 	\item \textbf{Registrazione:} l'Utente ottiene il suo certificato dalla CA.
 	\item \textbf{Richiesta di voto:} l'Utente effettua una richiesta di votazione all'Authenticator.
 	\item \textbf{Autenticazione: } Una volta fornito il permesso da parte dell'Authenticator, l'Utente può autenticarsi utilizzando il proprio certificato.
-	\item \textbf{Abilitazione al voto: } l'Authenticator verifica le credenziali dell'Utente e che non abbia già votato in precedenza (NEL WP2 QUESTA PARTE SARA' INTEGRATA ALLA SUCCESSIVA MA QUI NO SECONDO ME).
+	\item \textbf{Abilitazione al voto: } l'Authenticator verifica le credenziali dell'Utente e che non abbia già votato in precedenza.
 	\item \textbf{Invio del voto: } l'Utente trasmette il suo voto all'Authenticator, il quale lo inoltra al Server.
 	\item \textbf{Registrazione del voto: } il Server registra il voto garantendo integrità, anonimato, autenticità e unicità.
 	\item \textbf{Scrutinio finale: } al termine della fase di votazione, il Server calcola il risultato finale del referendum.
@@ -26,7 +26,7 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 	L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
 	Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
 	L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti perde la possibilità di votare e si compromette il sistema.\\
-	Quindi tale elettore deve avere una prova della propria identità, in modo da poter dimostrare al Server di essere un utente legittimo.
+	Quindi tale elettore deve avere una prova della propria identità, in modo da poter dimostrare all'Authenticator di essere un utente legittimo. Un Utente è legittimo se non ha già votato in precedenza e se possiede un certificato che dimostri la sua identità.
 
 \paragraph{Server (S):}
 	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
@@ -80,13 +80,13 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 			\item \textbf{Analisi del Traffico:} L'attaccante osserva la dimensione dei pacchetti per intuire il voto.
 		\end{itemize}
 		
-	\subsubsection{Attacchi Crittografici (Threat Model)}
-		\begin{itemize}
-			\item \textbf{Chosen Plaintext Attack (CPA):} 
-				Il malintenzionato può scegliere liberamente quali messaggi far cifrare e osservare i ciphertext risultanti, come se avesse accesso a un oracolo di cifratura. Questo gli permette di per pattern nell'algoritmo.
-			\item \textbf{Chosen Ciphertext Attack (CCA):}
-				L'attaccante può far decifrare ciphertext arbitrari e osservare i plaintext risultanti, individuando ad esempio errori di padding per risalire alla chiave o al messaggio.
-		\end{itemize}
+	%\subsubsection{Attacchi Crittografici (Threat Model)}
+	%	\begin{itemize}
+	%		\item \textbf{Chosen Plaintext Attack (CPA):} 
+	%			Il malintenzionato può scegliere liberamente quali messaggi far cifrare e osservare i ciphertext risultanti, come se avesse accesso a un oracolo di cifratura. Questo gli permette di per pattern nell'algoritmo.
+	%		\item \textbf{Chosen Ciphertext Attack (CCA):}
+	%			L'attaccante può far decifrare ciphertext arbitrari e osservare i plaintext risultanti, individuando ad esempio errori di padding per risalire alla chiave o al messaggio.
+	%	\end{itemize}
 
 	\subsubsection{Asset}
 		Come si evince dai possibili attacchi sopra definiti, l'asset del sistema è proprio l'insieme delle coppie Identità - voto. Questo perchè il requisito di anonimato stabilisce che non si possa risalire a questa associazione.
