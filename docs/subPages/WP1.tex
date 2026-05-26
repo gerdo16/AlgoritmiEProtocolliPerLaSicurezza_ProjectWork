@@ -31,14 +31,11 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 \paragraph{Server (S):}
 	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
 	Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
-	L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-	L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.  \\
-	Considerato il limitato livello di criticità del contesto di votazione, l'entità server viene considerata \textit{honest-but-curious}. Assumiamo quindi che il suo eventuale gestore non manometta i voti registrati. In questo senso non modifica i voti già esistenti, non ne inserisce di fittizi e non ne elimina di già registrati. 
+	L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.
 
 \paragraph{Authenticator (A):}
 	L'Authenticator è l'entità che si interpone tra l'Utente che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
-	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra l'Utente e il Server per il processo di votazione. \\
-	L’Authenticator viene assunto come entità fidata del sistema. Considerato il contesto applicativo universitario e il limitato livello di criticità del processo di voto, si ritiene ragionevole escludere la presenza di gestori disonesti tali da compromettere tale entità. Qualora l’Authenticator venisse compromesso, un attaccante potrebbe associare l’identità degli utenti ai rispettivi voti oppure autorizzare elettori non legittimi.
+	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra l'Utente e il Server per il processo di votazione.
 
 \paragraph{Certification Authority (CA):}
 	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa entità è, per definizione, una parte fidata del sistema.
@@ -46,7 +43,7 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 
 \divider
 
-\subsection{Threat model}
+\subsection{Threat model: Attacchi possibili}
 	Il sistema deve garantire che il processo di votazione da parte di elettori legittimi avvenga in maniera sicura, in modo tale da fronteggiare diversi attacchi possibili, ossia delle minacce (threat) al sistema da parte di malintenzionati con l'obiettivo di compromettere il sistema.\\
 	è possibile classificare le minacce in base alla tipologia.
 	
@@ -88,8 +85,41 @@ Il sistema di votazione è progettato per gestire un referendum binario in ambit
 	%			L'attaccante può far decifrare ciphertext arbitrari e osservare i plaintext risultanti, individuando ad esempio errori di padding per risalire alla chiave o al messaggio.
 	%	\end{itemize}
 
-	\subsubsection{Asset}
-		Come si evince dai possibili attacchi sopra definiti, l'asset del sistema è proprio l'insieme delle coppie Identità - voto. Questo perchè il requisito di anonimato stabilisce che non si possa risalire a questa associazione.
+\subsection{Threat model: Avversari possibili}
+	Dopo aver definito quali possibili attacchi mettono alla prova il sistema, nel threat model si assume la presenza di differenti tipologie di attaccanti, ognuna con capacità, risorse e obiettivi differenti.
+	
+		\paragraph{Attaccante Esterno sulla Rete:}
+		È un soggetto esterno al sistema che ha accesso al canale di comunicazione tra client, Authenticator e Server.\\
+		È un avversario che ha il controllo totale del canale pubblico di comunicazione: può intercettare (Eavesdropping), iniettare nuovi messaggi, modificare messaggi in transito (MIM) o replicare vecchi messaggi (Replay Attack). Ha l'obietytivo di violare la sicurezza del voto analizzando il traffico, oppure alterando l'integrità del voto modificando i pacchetti diretti al server o all'authenticator.\\
+		Come assunzioni si ha che non possiede e non riesce a ottenere le chiavi crittografiche private del sistema e non può compromettere direttamente i dispositivi degli utenti. Inoltre è importante assumere le sue risorse come limitate computazionalmente (PPT - Probabilistic Polynomial Time) perchè altrimenti anche gli algoritmi di cifratura asimmetrica (RSA) si romperebbero e non sarebbero più utilizzabili nel protocollo.\\
+		L'attaccante esterno è la tipologia più importante, infatti gli attacchi che può effettuare sono i seguenti:
+		\begin{itemize}
+			\item Spoofing dell'Authenticator/Server
+			\item Man-in-the-Middle
+			\item Replay Attack
+			\item Eavesdropping
+			\item Analisi del traffico
+		\end{itemize}
+		
+		\paragraph{Utente Malizioso:}
+		È un elettore legittimo che tenta di alterare il corretto funzionamento della votazione. Quindi è l'utente legittimamente registrato che tenta di sovvertire le regole del protocollo.\\
+		A livello di capacità e risorse, l'attaccante possiede le proprie credenziali legittime di autenticazione e chiavi private. Può deviare arbitrariamente dalle istruzioni del protocollo, con l'obiettivo di votare più di una volta (violazione dell'unicità) o impersonificare altri utenti.\\
+		Tuttavia, non riesce ad accedere ai database interni del Server o dell'Authenticator.
+		
+		\paragraph{Authenticator Curioso o Compromesso:}
+		Il gestore dell'Authenticator non è considerato completamente affidabile, perchè si assume la possibilità che sia curioso nel senso che esegue correttamente il protocollo ma prova a raccogliere informazioni sugli utenti.\\
+		In questo senso ha accesso completo al database degli utenti legittimi e ai log di autenticazione e modellandolo come Semi-Honest, segue fedelmente il protocollo (non modifica i dati), ma tenta di usare le informazioni in suo possesso per estrarre il voto degli elettori, creando l'associazione tra origine e voto e rompendo l'anonimato (attore honest-but-curious). Quindi il suo obiettivo è quello di associare l'identità dell'elettore che si sta autenticando al voto che verrà successivamente inviato al Server, violando l'anonimato.\\
+		L’authenticator viene assunto come entità parzialmente fidata del sistema, perchè considerato il contesto applicativo universitario e quindi il limitato livello di criticità del processo di voto, si ritiene ragionevole escludere la presenza di gestori disonesti tali da compromettere tale entità. Qualora l’Authenticator venisse compromesso, un attaccante potrebbe associare l’identità degli utenti ai rispettivi voti oppure autorizzare elettori non legittimi.\\
+		Il limite è che si considera internamente sicuro (fa parte di una rete protetta), non crea dei voti fittizi da mandare al server e si assume che non collabori con il Server per correlare identità e voto, e in questo senso si può considerare tale entità come Semi-Honest.
+		
+		\paragraph{Server Curioso o Compromesso:}
+		Analogamente all'authenticator, anche il server si considera Semu-Honest (honest-but-curious) perchè il gestore del server segue correttamente il protocollo stabilito, ma potrebbe tentare di trovare la provenienza del voto per rompere l'anonimato, accedendo ai voti memorizzati o analizzando i messaggi arrivati dall'authenticator.\\
+		L'attore è anche incaricato di registrare correttamente i voti e di garantire che non vengano registrati voti non validi.  \\
+		Considerato il limitato livello di criticità del contesto di votazione, l'entità server viene considerata semi-honest, assumendo quindi che il suo eventuale gestore non manometta i voti registrati. In questo senso non modifica i voti già esistenti, non ne inserisce di fittizi e non ne elimina di già registrati.
+	
+
+\subsubsection{Threat model: Asset}
+	Come si evince dai possibili attacchi sopra definiti, l'asset del sistema è proprio l'insieme delle coppie Identità - voto. Questo perchè il requisito di anonimato stabilisce che non si possa risalire a questa associazione.
 \divider
  
 
