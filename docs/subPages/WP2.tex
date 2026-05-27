@@ -4,43 +4,100 @@
 	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority).
 	\item \textbf{Certificazione del Server}: 
 		\begin{enumerate}
-			\item Il server genera una coppia di chiavi (privata $sk_S$, pubblica $pk_S$).
-			\item Il server chiede alla CA di certificare il messaggio (ID, $pk_S$), in cui l'ID è il nome DNS del server.
-			\item La CA verifica che il server appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
-			\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_S)$.
-			\item La CA unisce firma e dati, costruendo il certificato Cert(S) = ($\sigma$, ID, $pk_S$).
-			\item La CA restituisce il certificato al server.
+			\item Il Server genera una coppia di chiavi (privata $sk_S$, pubblica $pk_S$).
+			\item Il Server crea un certificato non firmato nel formato x509, composto dai campi:
+			$$
+			\begin{aligned}
+				Cert_{unsigned}(S) = (& \\
+				&\text{Version} = 3, \\
+				&\text{SerialNumber} = 000001, \\
+				&\text{Issuer} = \text{"University Voting CA"}, \\
+				&\text{Subject} = \texttt{"vote.unisa.it"}, \\
+				&\text{PublicKey} = pk_S, \\
+				&\text{Validity} = ( \\
+				&\qquad \text{NotBefore} = 01/01/2026, \\
+				&\qquad \text{NotAfter} = 01/01/2027 \\
+				&), \\
+				&\text{Role} = \text{"Voting Server"} \\
+				&)
+			\end{aligned}
+			$$
+			\item Il Server genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(S))$$
+			\item Il Server trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
+			\item La CA verifica che il Server appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
+			\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(S)))$$
+			\item La CA aggiunge la firma al certificato non firmato $$Cert(S)=(Cert_{unsigned}(S),\ \sigma)$$
+			\item La CA trasmette il certificato firmato al Server.
 		\end{enumerate}
+		
 	\item \textbf{Certificazione dell'Authority}:
 		\begin{enumerate}
-			\item L'authority genera una coppia di chiavi (privata $sk_A$, pubblica $pk_A$).
-			\item L'authority chiede alla CA di certificare il messaggio (ID, $pk_A$), in cui l'ID è il nome DNS dell'authority.
-			\item La CA verifica che l'authority appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stata approvata dagli amministratori del sistema. 
-			\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_A)$.
-			\item La CA unisce firma e dati, costruendo il certificato Cert(A) = ($\sigma$, ID, $pk_A$).
-			\item La CA restituisce il certificato all'authority.
+			\item L'Authority genera una coppia di chiavi (privata $sk_A$, pubblica $pk_A$).
+			\item L'Authority crea un certificato non firmato nel formato x509, composto dai campi:
+			$$
+			\begin{aligned}
+				Cert_{unsigned}(A) = (& \\
+				&\text{Version} = 3, \\
+				&\text{SerialNumber} = 000002, \\
+				&\text{Issuer} = \text{"University Voting CA"}, \\
+				&\text{Subject} = \texttt{"authenticate.unisa.it"}, \\
+				&\text{PublicKey} = pk_A, \\
+				&\text{Validity} = ( \\
+				&\qquad \text{NotBefore} = 01/01/2026, \\
+				&\qquad \text{NotAfter} = 01/01/2027 \\
+				&), \\
+				&\text{Role} = \text{"Authenticator"} \\
+				&)
+			\end{aligned}
+			$$
+			\item L'Authenticator genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(A))$$
+			\item L'Authenticator trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
+			\item La CA verifica che l'Authenticator appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
+			\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(A)))$$
+			\item La CA aggiunge la firma al certificato non firmato $$Cert(A)=(Cert_{unsigned}(A),\ \sigma)$$
+			\item La CA trasmette il certificato firmato all'Authenticator.
 		\end{enumerate}
+		
 	\item \textbf{Scambio dei certificati}:
 		\begin{itemize}
-			\item Il server trasmette il suo certificato Cert(S) all'authority,
-			\item L'authority trasmette il suo certificato al server.
+			\item Il Server trasmette il suo certificato firmato Cert(S) all'Authority,
+			\item L'Authority trasmette il suo certificato firmato al Server.
 		\end{itemize}	
+		
 	\item \textbf{Eventuale revoca dei certificati}:
 		\begin{itemize}
-			\item Se viene revocato il certificato del server, viene ripetuta la fase di certificazione del server e scambio dei certificati.
-			\item Se viene revocato il certificato dell'authority, viene ripetuta la fase di certificazione dell'authority e scambio dei certificati.
+			\item Se viene revocato il certificato del Server, viene ripetuta la fase di certificazione del Server e scambio dei certificati.
+			\item Se viene revocato il certificato dell'Authority, viene ripetuta la fase di certificazione dell'Authority e scambio dei certificati.
 		\end{itemize}
 \end{enumerate}
 
 
 \subsection{Fase certificato utente}
 \begin{enumerate}
-	\item L'utente genera una coppia di chiavi (privata $sk_U$, pubblica $pk_U$).
-	\item L'utente chiede alla CA di certificare il messaggio (ID, $pk_U$), in cui l'ID è la matricola universitaria dell'utente. (qualcuno potrebbe fingersi qualcun altro).
+	\item L'Utente genera una coppia di chiavi (privata $sk_U$, pubblica $pk_U$).
+	\item L'Utente crea un certificato non firmato nel formato x509, composto dai campi (Serial number e Subject sono solo un esempio in questo caso):
+	$$
+	\begin{aligned}
+		Cert_{unsigned}(U) = (& \\
+		&\text{Version} = 3, \\
+		&\text{SerialNumber} = 000150, \\
+		&\text{Issuer} = \text{"University Voting CA"}, \\
+		&\text{Subject} = \texttt{"IE22700089"}, \\
+		&\text{PublicKey} = pk_U, \\
+		&\text{Validity} = ( \\
+		&\qquad \text{NotBefore} = 01/01/2026, \\
+		&\qquad \text{NotAfter} = 01/01/2027 \\
+		&), \\
+		&\text{Role} = \text{"User"} \\
+		&)
+	\end{aligned}
+	$$
+	\item L'Utente genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(U))$$
+	\item L'Utente trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
 	\item La CA verifica che la matricola ricevuta è valida.
-	\item La CA genera una firma digitale del messaggio $\sigma = Sign_{sk_{CA}}(ID,\ pk_U)$.
-	\item La CA unisce firma e dati, costruendo il certificato Cert(U) = ($\sigma$, ID, $pk_U$).
-	\item La CA restituisce il certificato all'utente.
+	\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(U)))$$
+	\item La CA aggiunge la firma al certificato non firmato $$Cert(U)=(Cert_{unsigned}(U),\ \sigma)$$
+	\item La CA trasmette il certificato firmato all'Utente.
 \end{enumerate}
 
 
