@@ -1,4 +1,5 @@
 \subsection{Fase preliminare del sistema}
+In questa fase vengono generati i certificati degli attori principale del sistema, ovvero il Server e l'Authority. Inoltre, questa fase garantisce la consistenza dei certificati nel tempo, con un meccanismo di ricreazione.
 
 \begin{enumerate}
 	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority).
@@ -73,6 +74,8 @@
 
 
 \subsection{Fase certificato utente}
+Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compito è farsi generare un certificato valido dalla CA in modo da potersi autenticare all'Authenticator.
+
 \begin{enumerate}
 	\item L'Utente genera una coppia di chiavi (privata $sk_U$, pubblica $pk_U$).
 	\item L'Utente crea un certificato non firmato nel formato x509, composto dai campi (Serial number e Subject sono solo un esempio in questo caso):
@@ -102,7 +105,25 @@
 
 
 \subsection{Fase handshake}
+In questa fase l'utente possiede un certificato valido e vuol comunicare all'Authenticator la sua intenzione a votare, dovendo però verificare le identità dell'Authority e del Server.
 
+\begin{enumerate}
+	\item L'Utente trasmette una Vote Request all'Authenticator. Questo messaggio è formato dai campi:
+	$$
+	\begin{aligned}
+		\text{VoteRequest} = (& \\
+		&\text{msgType} = \text{"Vote Request}, \\
+		&\text{ElectionID}, \\
+		&\text{Nonce}, \\
+		&\text{Timestamp} \\
+		&)
+	\end{aligned}
+	$$
+	Il campo ElectionID è un identificativo univoco per l'utente in un determinato referendum. In questo modo un utente non possiede lo stesso ID per referendum differenti e l'Authenticator può subito verificare che appartenga al contesto universitario. Il Nonce è un numero casuale per prevenire i replay attack. Il Timestamp limita le richieste vecchie.
+	\item L'Authenticator verifica l'ElectionID dell'Utente, il Timestamp e il Nonce e infine trasmette all'Utente un messaggio contenente i certificati firmati: $$(Cert(A), Cert(S))$$
+	\item L'Utente, ricevuti i certificati, verifica utilizzato la chiave pubblica della CA $pk_{CA}$ la veridicità di tali certificati.
+	
+\end{enumerate}
 
 \subsection{Fase trasmissione voto}
 	Una volta che lo user ha verificato la validità del certifiacto dell'Authenticator e del Server nella fase precedente, ora usa sia la chiave pubblica di A ($pk_{A}$) che di S ($pk_{S}$) per costruire il primo messaggio di questa fase.\\
