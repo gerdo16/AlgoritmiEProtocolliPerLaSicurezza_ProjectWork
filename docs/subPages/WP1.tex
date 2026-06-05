@@ -143,9 +143,9 @@ In caso di attacchi o minacce descritti nella sezione precedente, si vogliono pr
 		\hline
 		\textbf{Verificabilità individuale} & \desc{Un elettore certificato può controllare la corretta ricezione del proprio voto.} & Alta \\
 		\hline
-		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Alta \\
+		\textbf{Verificabilità universale} & \desc{Chiunque può verificare il risultato finale.} & Media \\
 		\hline
-		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Alta \\
+		\textbf{Efficienza} & \desc{Il protocollo progettato deve essere computazionalmente efficiente.} & Media \\
 		\hline
 		\textbf{Trasparenza} & \desc{Il sistema non deve affidarsi eccessivamente a parti fidate.} & Media \\
 		\hline
@@ -155,6 +155,13 @@ In caso di attacchi o minacce descritti nella sezione precedente, si vogliono pr
 	\caption{Requisiti di sicurezza del sistema}
 	\label{tab:requisiti}
 \end{table}
+
+\subsubsection{Assunzioni}
+Le proprietà di Autenticità, Unicità, Integrità e Verificabilità Individuale sono considerate requisiti fondamentali e devono essere garantite dal protocollo.
+La proprietà di Segretezza è garantita solo sotto l'assunzione che Authenticator e Server non collaborino tra loro. Se tali entità colludessero, sarebbe possibile correlare l'identità dell'elettore con il voto espresso.
+La proprietà di Verificabilità Universale non può essere garantita dall'architettura proposta. Infatti il sistema non prevede meccanismi che consentano a entità esterne di verificare autonomamente la correttezza dell'intero scrutinio. Di conseguenza la correttezza del risultato finale dipende dall'assunzione che il Server operi secondo il protocollo previsto. Sebbene sia possibile fornire agli elettori una conferma della registrazione del proprio voto (Verificabilità Individuale), non e possibile consentire a chiunque di ricostruire e verificare indipendentemente il risultato complessivo della votazione. Per questo motivo la Verificabilità Universale viene considerata una proprietà desiderabile ma non garantita dal sistema.
+La proprietà di Trasparenza è solo parzialmente soddisfatta, poichè il sistema si basa sulla presenza di una CA e assume che Authenticator e Server siano semi-honest che rispettano il protocollo. Di conseguenza, il sistema richiede un certo livello di fiducia nelle entità coinvolte.
+La proprietà di Revocabilità o sostituzione del voto non è supportata dal sistema. Una volta registrato, il voto viene considerato definitivo e non può essere modificato o ritirato dall'elettore. Tale funzionalità introdurrebbe problematiche legate alla gestione dell'anonimato.
 
 \divider
 
