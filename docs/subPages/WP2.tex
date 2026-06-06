@@ -108,20 +108,17 @@ Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compi
 In questa fase l'utente possiede un certificato valido e vuol comunicare all'Authenticator la sua intenzione a votare, dovendo però verificare le identità dell'Authority e del Server.
 
 \begin{enumerate}
-	\item L'Utente trasmette una Vote Request all'Authenticator. Questo messaggio è formato dai campi:
+	\item L'Utente trasmette una Vote Request all'Authenticator. Questo messaggio è nel formato:
 	$$
 	\begin{aligned}
 		\text{VoteRequest} = (& \\
-		&\text{msgType} = \text{"Vote Request}, \\
-		&\text{ElectionID}, \\
-		&\text{Nonce}, \\
-		&\text{Timestamp} \\
+		&\text{msgType} = \text{"Vote Request} \\
 		&)
 	\end{aligned}
 	$$
-	Il campo ElectionID è un identificativo univoco per l'utente in un determinato referendum. In questo modo un utente non possiede lo stesso ID per referendum differenti e l'Authenticator può subito verificare che appartenga al contesto universitario. Il Nonce è un numero casuale per prevenire i replay attack. Il Timestamp limita le richieste vecchie.
-	\item L'Authenticator verifica l'ElectionID dell'Utente, il Timestamp e il Nonce e infine trasmette all'Utente un messaggio contenente i certificati firmati: $$(Cert(A), Cert(S))$$
-	\item L'Utente, ricevuti i certificati, verifica utilizzato la chiave pubblica della CA $pk_{CA}$ la veridicità di tali certificati.
+	\item L'Authenticator trasmette all'Utente richiedente un messaggio contenente i certificati firmati: $$(Cert(A), Cert(S))$$
+	Ovvero: $$((Cert_{unsigned}(A), \sigma_{A}),\ (Cert_{unsigned}(S), \sigma_{S}))$$
+	\item L'Utente, ricevuti i certificati, verifica utilizzato la chiave pubblica della CA $pk_{CA}$ la veridicità di tali certificati: $$ \text{Vrfy}_{pk_{CA}}(Cert_{unsigned}(A), \sigma_{A}) = 1 $$  $$ \text{Vrfy}_{pk_{CA}}(Cert_{unsigned}(S), \sigma_{S}) = 1 $$
 	
 \end{enumerate}
 
