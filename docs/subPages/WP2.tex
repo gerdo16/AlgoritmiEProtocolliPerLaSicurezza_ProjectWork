@@ -239,7 +239,10 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			
 			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
 			
-			\item \textbf{ACK e Finalizzazione:} S invia all'Authenticator una ricevuta (ACK) indicante il completamento del processo. A questo punto, A inserisce definitivamente l'hash $H(pk_U)$ dell'elettore nella sua mappa per impedirne il doppio voto e inoltra l'ACK finale all'utente U.
+			\item \textbf{Preparazione ACK:} S prepara un pacchetto di ACK da inviare all'Authenticator.
+			$$ c $$
+			
+			\item \textbf{Inoltro dell'ACK}S invia all'Authenticator una ricevuta (ACK) indicante il completamento del processo. A questo punto, A inserisce definitivamente l'hash $H(pk_U)$ dell'elettore nella sua mappa per impedirne il doppio voto e inoltra l'ACK finale all'utente U.
 		\end{enumerate}
 	
 	

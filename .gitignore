@@ -11,6 +11,9 @@
 !docs/img/
 !docs/img/*
 
+!docs/puml/
+!docs/puml/*
+
 !source/
 !source/*
 

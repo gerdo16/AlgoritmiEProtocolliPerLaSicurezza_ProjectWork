@@ -1,0 +1,125 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Diagramma di Sequenza WP2: messaggi del protocollo
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+
+
+
+== Fase Preliminare del sistema ==
+'autonumber 1
+group 1
+CA -> CA: Cert(CA)
+note right
+    La CA genera sk_CA e pk_CA
+    e si autocertifica
+end note
+CA -> A: invio Cert(CA)
+CA -> S: invio Cert(CA)
+end
+
+group 2
+S -> S: Generazione sk_S e pk_S
+S -> CA: Richiesta Cert(S)
+CA -> S: invio Cert(CA) firmato da CA
+end
+
+group 3
+A -> A: Generazione sk_A e pk_A
+A -> CA: Richiesta Cert(A)
+CA -> A: invio Cert(CA) firmato da CA
+end
+
+group 4
+A -> S: Invio Cert(A) firmato da CA
+S -> A: Invio Cert(S) firmato da CA
+end
+
+
+== Fase Certificato Utente ==
+U -> U: Generazione sk_U e pk_U
+U -> CA: Richiesta Cert(U)
+CA -> U: invio Cert(CA) firmato da CA
+CA -> U: invio Cert(U) firmato da CA
+
+
+== Fase di Handshake ==
+U -> A: VoteRequest
+A -> U: Cert(A), Cert(S)
+U -> U: Verifica Cert(A) e Cert(S)
+note right
+    L'utente verifica i certificati con 
+    Cert(CA), quindi con pk_CA
+end note
+
+
+== Fase Trasmissione voto ==
+U -> A: C_final=Enc_pkA(s, c, Cert(U))
+note right
+    L'utente cifra il voto v (ottenendo c), 
+    lo firma con sk_U (s),
+    e il certificato
+end note
+
+A -> A: Decifrazione C_final con sk_A
+A -> A: Verifica Cert(U)
+note right
+    A può verificare Cert(U) perchè
+    ha Cert(CA) e quindi pk_CA
+end note
+
+alt #Pink Failure
+    A -X U: richiesta rifiutata (utente non legittimo)
+else #LightBlue Successful case
+    A -> A: autenticazione riuscita
+end
+A -> A: estrae pk_U da Cert(U)
+A -> A: Verifica firma s con pk_U
+alt #Pink Failure
+    A -X U: richiesta rifiutata (integrità voto compromessa)
+else #LightBlue Successful case
+    A -> A: integrità voto verificata
+end
+A -> A: verifica se U ha già votato
+note right
+    A mantiene una mappa <H(pk_U), c>
+    per verificare se U ha già votato
+end note
+alt #Pink Failure
+    A -X U: richiesta rifiutata (utente ha già votato)
+else #LightBlue Successful case
+    A -> A: voto accettato
+end
+A -> A: prepara (c, s_A)
+note right
+    A prepara per S il voto cifrato c
+    e la firma s_A di A su c con sk_A
+end note
+A -> A: bufferizza (c, s_A)
+A -> S: invio (c, s_A)
+
+S -> S: Verifica firma s_A con pk_A
+alt #Pink Failure
+    S -> A: richiesta rifiutata (integrità voto compromessa)
+    A -X U: richiesta rifiutata
+else #LightBlue Successful case
+    S -> S: integrità voto verificata
+end
+S -> S: decifra c con sk_S
+note right
+    S decifra c per ottenere v
+end note
+S -> S: registrazione voto v
+S -> A: ACK
+
+
+@enduml

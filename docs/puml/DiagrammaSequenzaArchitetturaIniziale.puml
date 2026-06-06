@@ -1,0 +1,38 @@
+@startuml
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+' Definizione dei partecipanti con i colori corrispondenti all'immagine
+actor "Utente" as Utente #E8E8FF
+participant "CA" as CA #FFEAD5
+database "Authenticator" as Authenticator #D5FFD5
+database "Server" as Server #FFE8E8
+
+== Registrazione ==
+autonumber 1
+Utente -> CA: richiesta certificato
+CA -> Utente: certificato
+
+== Richiesta di voto / Autenticazione / Abilitazione ==
+autonumber 2
+Utente -> Authenticator: richiesta di votazione
+autonumber 3
+Authenticator -> Utente: permesso di accesso
+Utente -> Authenticator: certificato utente
+autonumber 4
+Authenticator -> Authenticator: verifica credenziali
+
+== Invio del voto / Reg. voto ==
+autonumber 5
+Utente -> Authenticator: voto
+Authenticator -> Server: inoltro voto
+autonumber 6
+Server -> Server: registra voto
+
+== Scrutinio ==
+autonumber 7
+Server -> Server: calcola risultato
+
+@enduml
