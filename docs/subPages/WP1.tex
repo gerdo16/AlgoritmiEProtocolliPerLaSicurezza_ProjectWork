@@ -1,44 +1,41 @@
-\subsection{Architettura generale del sistema}
-Il sistema di votazione è progettato per gestire un referendum binario in ambito universitario. Il processo di votazione si articola nelle seguenti fasi:
-
-\begin{enumerate}
-	\item \textbf{Registrazione:} l'Utente ottiene il suo certificato dalla CA.
-	\item \textbf{Richiesta di voto:} l'Utente effettua una richiesta di votazione all'Authenticator.
-	\item \textbf{Autenticazione: } Una volta fornito il permesso da parte dell'Authenticator, l'Utente può autenticarsi utilizzando il proprio certificato.
-	\item \textbf{Abilitazione al voto: } l'Authenticator verifica le credenziali dell'Utente e che non abbia già votato in precedenza.
-	\item \textbf{Invio del voto: } l'Utente trasmette il suo voto all'Authenticator, il quale lo inoltra al Server.
-	\item \textbf{Registrazione del voto: } il Server registra il voto garantendo integrità, anonimato, autenticità e unicità.
-	\item \textbf{Scrutinio finale: } al termine della fase di votazione, il Server calcola il risultato finale del referendum.
-\end{enumerate}
-
-\begin{figure}[H]
-	\centering
-	\scalebox{0.6}{\input{./subPages/DiagrammaSequenzaArchitetturaIniziale.tex}}
-\end{figure}
-
-
-
 \subsection{Attori del sistema}
 	Gli attori onesti inclusi nel sistema utilizzano il protocollo sicuro per completare il processo di votazione, e sono quattro.
-\paragraph{User (U):}
-	L'utente è l'entità del sistema che rappresenta l'elettore legittimato a votare. Quindi il suo obiettivo è quello di contattare il Server per inviare il proprio voto, ossia la sua preferenza sul referendum binario, scegliendo tra \textit{"SI"} e \textit{"NO"}.\\
-	L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
-	Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
-	L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti perde la possibilità di votare e si compromette il sistema.\\
-	Quindi tale elettore deve avere una prova della propria identità, in modo da poter dimostrare all'Authenticator di essere un utente legittimo. Un Utente è legittimo se non ha già votato in precedenza e se possiede un certificato che dimostri la sua identità.
-
-\paragraph{Server (S):}
-	L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
-	Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
-	L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.
-
-\paragraph{Authenticator (A):}
-	L'Authenticator è l'entità che si interpone tra l'Utente che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
-	Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra l'Utente e il Server per il processo di votazione.
-
-\paragraph{Certification Authority (CA):}
-	L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa entità è, per definizione, una parte fidata del sistema.
+	\paragraph{User (U):}
+		L'utente è l'entità del sistema che rappresenta l'elettore legittimato a votare. Quindi il suo obiettivo è quello di contattare il Server per inviare il proprio voto, ossia la sua preferenza sul referendum binario, scegliendo tra \textit{"SI"} e \textit{"NO"}.\\
+		L'utente vuole essere certo che il suo voto sia anonimo, in modo tale che nessun malintenzionato possa compromettere la comunicazione per scoprire la sua preferenza, e si aspetta che il voto resti segreto anche successivamente.\\
+		Inoltre l'entità in esame confida che il suo voto raggiunga la destinazione e che gli arrivi una conferma dell'avvenuta registrazione del suo voto e che sia integro all'interno del Server. In caso contrario desidera sapere che non è stato registrato a causa di qualsiasi errore del sistema, in modo tale che possa riprovare in seguito.\\
+		L'utente si aspetta che nessun malintenzionato utilizzi la sua identità per votare al suo posto, altrimenti perde la possibilità di votare e si compromette il sistema.\\
+		Quindi tale elettore deve avere una prova della propria identità, in modo da poter dimostrare all'Authenticator di essere un utente legittimo. Un Utente è legittimo se non ha già votato in precedenza e se possiede un certificato che dimostri la sua identità.
 	
+	\paragraph{Server (S):}
+		L'entità Server è incaricata di contare i voti degli utenti per determinare il risultato finale, senza riconoscere la vera identità del votante. L'entità in esame è quindi incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.\\
+		Il Server vuole essere certo che i voti che riceve siano autentici, ossia che provengano da utenti legittimi, e che non siano stati alterati durante la trasmissione.\\
+		L'entità in esame è incaricata di mantenere anonimi i voti, in modo tale che nessun malintenzionato possa scoprire le preferenze degli utenti.
+	
+	\paragraph{Authenticator (A):}
+		L'Authenticator è l'entità che si interpone tra l'Utente che vuole votare e il Server che deve conservare le preferenze degli elettori. Il suo scopo è quello di controllare l'identità dell'entità che desidera votare, quindi controlla l'autenticità dell'utente in modo tale che possa essere considerato un elettore legittimato a partecipare al referendum.\\
+		Quindi è un vero e proprio proxy di sicurezza che rappresenta l'intermediario nella comunicazione tra l'Utente e il Server per il processo di votazione.
+	
+	\paragraph{Certification Authority (CA):}
+		L'entità certification authority è incaricata di rilasciare certificati digitali agli utenti, all'authenticator e al server. È suo compito quindi fornire chiavi pubbliche certificate ai suoi clienti e verificare l'autenticità di altri certificati quando le viene richiesto. Questa entità è, per definizione, una parte fidata del sistema.
+
+\subsection{Architettura generale del sistema}
+	Il sistema di votazione è progettato per gestire un referendum binario in ambito universitario. Il processo di votazione si articola nelle seguenti fasi:
+	
+	\begin{enumerate}
+		\item \textbf{Registrazione:} l'Utente ottiene il suo certificato dalla CA.
+		\item \textbf{Richiesta di voto:} l'Utente effettua una richiesta di votazione all'Authenticator.
+		\item \textbf{Autenticazione: } Una volta fornito il permesso da parte dell'Authenticator, l'Utente può autenticarsi utilizzando il proprio certificato.
+		\item \textbf{Abilitazione al voto: } l'Authenticator verifica le credenziali dell'Utente e che non abbia già votato in precedenza.
+		\item \textbf{Invio del voto: } l'Utente trasmette il suo voto all'Authenticator, il quale lo inoltra al Server.
+		\item \textbf{Registrazione del voto: } il Server registra il voto garantendo integrità, anonimato, autenticità e unicità.
+		\item \textbf{Scrutinio finale: } al termine della fase di votazione, il Server calcola il risultato finale del referendum.
+	\end{enumerate}
+	
+	\begin{figure}[H]
+		\centering
+		\scalebox{0.6}{\input{./subPages/DiagrammaSequenzaArchitetturaIniziale.tex}}
+	\end{figure}
 
 \divider
 
