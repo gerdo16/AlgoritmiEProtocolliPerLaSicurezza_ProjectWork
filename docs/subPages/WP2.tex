@@ -23,12 +23,12 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 				&)
 			\end{aligned}
 			$$
-			\item Il Server genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(S))$$
-			\item Il Server trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
+			\item Il Server trasmette alla CA il certificato non firmato, richiedendone la certificazione. $$Cert_{unsigned}(S)$$
 			\item La CA verifica che il Server appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
+			\item La CA calcola l'hash del certificato non firmato: $$H(Cert_{unsigned}(S))$$
 			\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(S)))$$
 			\item La CA aggiunge la firma al certificato non firmato $$Cert(S)=(Cert_{unsigned}(S),\ \sigma)$$
-			\item La CA trasmette il certificato firmato al Server.
+			\item La CA trasmette il certificato firmato Cert(S) al Server.
 		\end{enumerate}
 		
 	\item \textbf{Certificazione dell'Authority}:
@@ -51,9 +51,9 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 				&)
 			\end{aligned}
 			$$
-			\item L'Authenticator genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(A))$$
-			\item L'Authenticator trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
+			\item L'Authenticator trasmette alla CA il certificato non firmato, richiedendone la certificazione. $$Cert_{unsigned}(A)$$
 			\item La CA verifica che l'Authenticator appartenga effettivamente all’infrastruttura autorizzata del sistema di voto universitario e che sia stato approvato dagli amministratori del sistema. 
+			\item La CA calcola l'hash del certificato non firmato: $$H(Cert_{unsigned}(A))$$
 			\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(A)))$$
 			\item La CA aggiunge la firma al certificato non firmato $$Cert(A)=(Cert_{unsigned}(A),\ \sigma)$$
 			\item La CA trasmette il certificato firmato all'Authenticator.
@@ -95,12 +95,12 @@ Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compi
 		&)
 	\end{aligned}
 	$$
-	\item L'Utente genera l'hash dell'intero certificato non firmato, producendo un'impronta digitale. $$H(Cert_{unsigned}(U))$$
-	\item L'Utente trasmette alla CA l'hash del certificato non firmato, chiedendole di firmarlo.
+	\item L'Utente trasmette alla CA il certificato non firmato, richiedendone la certificazione. $$Cert_{unsigned}(U)$$
 	\item La CA verifica che la matricola ricevuta è valida.
+	\item La CA calcola l'hash del certificato non firmato: $$H(Cert_{unsigned}(U))$$
 	\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(U)))$$
 	\item La CA aggiunge la firma al certificato non firmato $$Cert(U)=(Cert_{unsigned}(U),\ \sigma)$$
-	\item La CA trasmette il certificato firmato all'Utente.
+	\item La CA trasmette un messaggio all'utente contenente il suo certificato e il certificato firmato dell'utente. $$(Cert(CA), Cert(U))$$
 \end{enumerate}
 
 
