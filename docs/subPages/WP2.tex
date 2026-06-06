@@ -187,7 +187,8 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 				\item Se la firma è valida ($V_{pk_U}(c, \sigma)=1$), A ha la certezza matematica che il messaggio provenga dal reale proprietario del certificato e inoltre non è stato manipolato il messaggio perchè il contenuto si dimostra integro grazie alla firma.
 			\end{itemize}
 			
-			\item \textbf{Verifica dell'unicità del voto:} Solo dopo aver verificato con successo la firma, l'Authenticator controlla se l'utente ha già votato. A mantiene una collezione (implementata come Hash Table, quindi come una mappa) le cui chiavi sono gli hash delle chiavi pubbliche degli utenti ($H(pk_U)$) che hanno già votato e il cui voto è stato registrato correttamente nel server. Invece il valore è il voto cifrato con la chiave pubblica dell'utente stesso TODOOOOOOOOOOOOOOOO
+			\item \textbf{Verifica dell'unicità del voto:} Solo dopo aver verificato con successo la firma, l'Authenticator controlla se l'utente ha già votato. A mantiene una collezione (implementata come Hash Table, quindi come una mappa) le cui chiavi sono gli id degli utenti legittimi, ossia gli hash delle chiavi pubbliche degli utenti ($H(pk_U)$) che hanno già votato e il cui voto è stato registrato correttamente nel server. Invece il valore è il voto cifrato con la chiave pubblica dell'utente stesso, ossia $c=\text{Enc}_{pk_U}(v)$.
+			$$ \text{VoterMap: } [ID_U \to c] = [H(pk_U) \to c]$$
 			\begin{itemize}
 				\item Se l'hash è già presente, l'Authenticator notifica l'utente che ha già espresso la propria preferenza e scarta il pacchetto \textit{(mitigazione contro Replay Attack)}. Anche in questo caso A non procede con gli step successivi per registrare il voto ed elimina definitivamente tutte le informazioni inviate dall'utente (quindi firma e certificato).
 				
@@ -239,10 +240,49 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			
 			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
 			
-			\item \textbf{Preparazione ACK:} S prepara un pacchetto di ACK da inviare all'Authenticator.
-			$$ c $$
+			\item \textbf{Preparazione ACK: } S prepara un pacchetto ricevuta di ACK cifrato da inviare all'Authenticator.
+			$$ c=Enc_{pk_A}(ACK),\ \sigma_S=Sign_{sk_S}(c) \to (c||\sigma_S) $$
+			Lo schema seguito è sempre Encrypt-then-Sign, infatti S cifra prima il messaggio di ACK con la chiave pubblica di A e poi firma il cifrato con la propria chiave privata $sk_S$.
 			
-			\item \textbf{Inoltro dell'ACK}S invia all'Authenticator una ricevuta (ACK) indicante il completamento del processo. A questo punto, A inserisce definitivamente l'hash $H(pk_U)$ dell'elettore nella sua mappa per impedirne il doppio voto e inoltra l'ACK finale all'utente U.
+			\item \textbf{Inoltro dell'ACK: } S invia all'Authenticator la ricevuta indicante il completamento del processo
+			$$ (c||\sigma_S) $$
+		\end{enumerate}
+		
+	\subsubsection{A $\to$ U: ACK e Finalizzazione}
+		\begin{enumerate}
+			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
+			$$ V_{pk_S}(c, \sigma_S) $$
+			\begin{itemize}
+				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dal server, pertanto si scarta immediatamente l'ACK e si notifica il mittente che l'operazione è stata annullata.
+				
+				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dal server perchè solo lui conosce la propria chiave privata $sk_S$ che gli ha permesso di generare la firma digitale $\sigma_S$.
+			\end{itemize}
+			
+			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
+			$$ ACK = \text{Dec}_{sk_A}(c) $$
+			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server.
+
+			\item \textbf{Salvataggio dell'hash dell'elettore:} Solo dopo aver verificato che il voto è stato registrato correttamente, A può procedere a inserire l'hash della chiave pubblica dell'utente $H(pk_U)$ nella mappa degli utenti che hanno già votato, in questo modo si impedisce il doppio voto da parte dello stesso elettore.
+			$$ [H(pk_U),c] \to \text{VoterMap} $$
+
+			\item \textbf{Notifica all'utente:} A notifica l'utente che il voto è stato registrato correttamente, per concludere il processo di voto. Utilizza lo schema Sign-then-Encrypt firmando il messaggio di ACK con la propria chiave privata $sk_A$ e cifrandolo con la chiave pubblica dell'utente $pk_U$:
+			$$ \sigma_A' = \text{Sign}_{sk_A}(ACK),\ C_{final}' = \text{Enc}_{pk_U}(\sigma_A' \| ACK) $$
+		\end{enumerate}
+
+	\subsubsection{U: Ricezione finale}
+		\begin{enumerate}
+			\item \textbf{Decifrazione dell'ACK:} L'utente riceve il messaggio $C_{final}'$ e deve decifrarlo con la propria chiave privata $sk_U$ per ottenere il messaggio in chiaro:
+			$$ \text{Dec}_{sk_U}(C_{final}') = \text{Dec}_{sk_U}(\text{Enc}_{pk_U}(\sigma_A' \| ACK)) = \boxed{(\sigma_A' \| ACK)} $$
+			
+			\item \textbf{Verifica della firma:} L'utente verifica la firma digitale $\sigma_A'$ con la chiave pubblica di A $pk_A$:
+			$$ V_{pk_A}(\sigma_A', ACK) $$
+			\begin{itemize}
+				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dall'authenticator, pertanto si scarta immediatamente l'ACK
+				
+				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dall'authenticator perchè solo lui conosce la propria chiave privata $sk_A$ che gli ha permesso di generare la firma digitale $\sigma_A'$.
+			\end{itemize}
+			
+			\item \textbf{Notifica all'utente:} Se la verifica della firma restituisce un risultato positivo, l'utente riceve la conferma che il voto è stato registrato correttamente nel server, concludendo così il processo di voto.
 		\end{enumerate}
 	
 	
