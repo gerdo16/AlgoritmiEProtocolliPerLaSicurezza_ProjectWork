@@ -1,8 +1,28 @@
+In questa sezione viene discusso nel dettaglio il protocollo progettato. In questo protocollo sono stati utilizzati vari algoritmi noti, raggruppati nella seguente tabella.
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Funzionalità} & \textbf{Algoritmo} & \textbf{Utilizzo} \\
+		\hline
+		Cifratura asimmetrica & \textbf{RSA-OAEP} & Protezione dei voti e degli ACK \\
+		\hline
+		Firma digitale & \textbf{RSA-OAEP} & Autenticità e integrità dei messaggi \\ 
+		\hline
+		Hash crittografico & \textbf{SHA-256} & Firma dei certificati e identificazione degli elettori \\
+		\hline
+	\end{tabular}
+	\caption{Algoritmi utilizzati nel protocollo per le votazioni digitali sicure.}
+	\label{tab:algoritmi}
+\end{table}
+
 \subsection{Fase preliminare del sistema}
 In questa fase vengono generati i certificati degli attori principale del sistema, ovvero il Server e l'Authority. Inoltre, questa fase garantisce la consistenza dei certificati nel tempo, con un meccanismo di ricreazione.
 
 \begin{enumerate}
-	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority).
+	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority). Dopo la fase di emissione dei certificati, la CA non partecipa al protocollo di voto.
 	\item \textbf{Certificazione del Server}: 
 		\begin{enumerate}
 			\item Il Server genera una coppia di chiavi (privata $sk_S$, pubblica $pk_S$).
@@ -65,7 +85,7 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 			\item L'Authority trasmette il suo certificato firmato al Server.
 		\end{itemize}	
 		
-	\item \textbf{Eventuale revoca dei certificati}:
+	\item \textbf{Eventuale revoca dei certificati}: \\
 		\begin{itemize}
 			\item Se viene revocato il certificato del Server, viene ripetuta la fase di certificazione del Server e scambio dei certificati.
 			\item Se viene revocato il certificato dell'Authority, viene ripetuta la fase di certificazione dell'Authority e scambio dei certificati.
@@ -140,7 +160,7 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			
 			\item Cifratura interna: L'utente cifra il voto con la chiave pubblica di S, creando in questo modo il seguente chipertext:
 			$$ c = \text{Enc}_{pk_S}(v) $$
-			Il contenuto di questo chipertext, ossia il voto in sè, è leggibile solo e soltanto dal Server in quanto unico possessore della sua chiave privata $sk_{S}$. Quindi nessuna entità potrà leggere questo voto, in particolare l'Authenticar.
+			Il contenuto di questo chipertext, ossia il voto in sè, è leggibile solo e soltanto dal Server in quanto unico possessore della sua chiave privata $sk_{S}$. Quindi nessuna entità potrà leggere questo voto, in particolare l'Authenticatorp[--].
 			
 			\item Firma del cifrato: Questa firma è il primo step dello schema Sign-then-Encrypt, infatti prevede che l'utente firmi il messaggio che vuole inviare all'Authenticator, ossia il chipertext del voto ($c$) e non il semplice voto in chiaro:
 			$$ \sigma = \text{Sign}_{sk_U}(c) $$
