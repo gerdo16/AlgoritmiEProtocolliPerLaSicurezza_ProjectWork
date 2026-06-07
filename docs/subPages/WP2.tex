@@ -85,10 +85,11 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 			\item L'Authority trasmette il suo certificato firmato al Server.
 		\end{itemize}	
 		
-	\item \textbf{Eventuale revoca dei certificati}: \\
+	\item \textbf{Eventuale rinnovo dei certificati}: \\
+	Il sistema non implementa meccanismi dinamici di revoca anticipata dei certificati. La validità dei certificati è limitata temporalmente meediante i campi NotBefore e NotAfter.
 		\begin{itemize}
-			\item Se viene revocato il certificato del Server, viene ripetuta la fase di certificazione del Server e scambio dei certificati.
-			\item Se viene revocato il certificato dell'Authority, viene ripetuta la fase di certificazione dell'Authority e scambio dei certificati.
+			\item Se scade il certificato del Server, viene ripetuta la fase di certificazione del Server e scambio dei certificati.
+			\item Se scade il certificato dell'Authority, viene ripetuta la fase di certificazione dell'Authority e scambio dei certificati.
 		\end{itemize}
 \end{enumerate}
 
@@ -231,7 +232,7 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			Quindi attende un certo intervallo di tempo, oppure il raggiungimento di un numero prestabilito di voti (batching), prima di inoltrarli al Server. Prima dell'invio effettivo, l'Authenticator estrae i pacchetti dalla mappa e ne effettua uno shuffle.\\
 			Questa contromisura è essenziale per mitigare le vulnerabilità legate all'analisi del traffico temporale (Timing Attack), impedendo a un osservatore passivo di correlare l'arrivo del pacchetto da U con la successiva trasmissione verso S.
 			
-			\item \textbf{Inoltro effettivo del voto a S:} Una volta prelevato dal buffer di inoltro uno degli item $(c \| \sigma_{A})$ associato all'ID dello user sorgente, può inviare il pacchetto $(c \| \sigma_{A})$ a S, conservando l'informazione che è stato mandato il voto dell'utente con quel determinato ID per poterlo inserire successivamente nella mappa degli utenti, dopo aver ricevuto l'ACK da parte del server.
+			\item \textbf{Inoltro effettivo del voto a S:} Una volta prelevato dal buffer di inoltro uno degli item $(c \| \sigma_{A})$ associato all'ID dello user sorgente, può inviare il pacchetto $(c \| \sigma_{A})$ a S, conservando l'informazione che è stato mandato il voto dell'utente con quel determinato ID per poterlo inserire successivamente nella mappa degli utenti, dopo aver ricevuto l'ACK da parte del server. L'Authenticator trasmette un solo item alla volta, attendendo la ricezione dell'ACK. Solamente ad ACK ricevuto procede con la trasmissione dell'item successivo.
 		\end{enumerate}
 	
 	
@@ -303,7 +304,12 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 		\end{enumerate}
 	
 \subsection{Verifica individuale del voto}
-	
+La verificabilità individuale è garantita dal meccanismo di conferma finale del voto e dalla Hash Table salvata dall'Authenticator. Infatti l'Utente riceve un ACK che viene generato dal Server a seguito della corretta registrazione del voto e successivamente inoltrata dall'Authenticator. L'ACK è protetto mediante firma digitale e può quindi essere verificato dall'Utente. In questo modo l'elettoree ottiene evidenza del fatto che il proprio voto è stato registrato dal sistema e può consultare la Hash Table dell'Authenticator per ottenere il suo voto cifrato con la sua chiave pubblica $pk_U$. \\
+Tale proprietà garantisce la conferma della registrazione del voto, ma non consente all'elettore di verificare autonomamente che il contenuto del voto registrato nel Server coincida con quello espresso.
+
+\subsection{Verifica universale del voto}
+La verificabilità univeresale non è completamente garantita dal protocollo proposto. Al termine dello scrutinio il Server pubblica il numero totale di voti validi e il risultato finale della votazione, consentendo di verificare la coerenza tra il numero di voti registrati e il numero di elettori autorizzati dall'Authenticator. Di conseguenza, un utente esterno può conoscere il risultato della votazione ma non può verificare indipendentemente che esso sia stato ottenuto conteggiando correttamente tutti i voti validi registrati dal sistema (Ad esempio: il Server, una volta decifrato un voto v="SI", potrebbe decidere di conteggiarlo tra i NO). \\
+Quindi la correttezza del risultato finale dipende dall'assunzione che il Server operi in modo semi-honest e rispetti il protocollo previsto.
 	
 	
 	
