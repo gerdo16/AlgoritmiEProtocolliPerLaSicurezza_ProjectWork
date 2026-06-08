@@ -288,7 +288,9 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server.
 
 			\item \textbf{Salvataggio dell'hash dell'elettore:} Solo dopo aver verificato che il voto è stato registrato correttamente, A può procedere a inserire l'hash della chiave pubblica dell'utente $H(pk_U)$ nella mappa degli utenti che hanno già votato, in questo modo si impedisce il doppio voto da parte dello stesso elettore.
-			$$ [H(pk_U),c] \to \text{VoterMap} $$
+			$$ [H(pk_U),c'] \to \text{VoterMap} $$
+			Si ricorda che $c'=\text{Enc}_{pk_U}(v)$ è il voto cifrato con la chiave pubblica dell'utente, che è stato creato dallo user stesso nel primo messaggio $C_{final}=\text{Enc}_{pk_A}(\sigma \| c\| c'\| \text{Cert(U)})$ inviando ad A.\\
+			Quindi A conserva in questa mappa l'informazione del voto cifrato associato all'ID dell'utente, ossia l'hash della chiave pubblica $H(pk_U)$, in modo da poter recuperare il voto cifrato in caso di richiesta di verifica individuale del voto da parte dell'utente, senza che A possa conoscere il contenuto del voto cifrato, garantendo così l'anonimato dell'elettore.
 
 			\item \textbf{Notifica all'utente:} A notifica l'utente che il voto è stato registrato correttamente, per concludere il processo di voto. Utilizza lo schema Sign-then-Encrypt firmando il messaggio di ACK con la propria chiave privata $sk_A$ e cifrandolo con la chiave pubblica dell'utente $pk_U$:
 			$$ \sigma_A' = \text{Sign}_{sk_A}(ACK),\ C_{final}' = \text{Enc}_{pk_U}(\sigma_A' \| ACK) $$
