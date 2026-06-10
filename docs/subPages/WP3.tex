@@ -2,10 +2,18 @@
 
 
 \paragraph{Autenticità}:
+Ogni Utente intenzionato a votare possiede un certificato digitale valido firmato dalla Certificate Authority. L'Authenticator verifica la validità del certificato e infine verifica la firma sul voto cifrato. Solo l'Utente in possesso della chiave privata $sk_U$ può produrre una firma valida, quindi un attaccante non può impersonare un elettore senza compromettere la sua chiave privata. \\
+La proprietà è garantita solo se assumiamo che, in fase di richiesta certificato utente (2.2), tutti gli Utenti inseriscano nel campo Subject del certificato non firmato la propria matricola corretta. Se così non fosse, chiunque potrebbe fingersi qualcun'altro.
 
 \paragraph{Unicità}:
+La proprietà di unicità è garantita dall'Authenticator attraverso la struttura dati VoterMap, che mantiene traccia degli elettori che hanno già votato. In particolare, l'identificativo dell'elettore viene rappresentato mediante l'hash della sua chiave pubblica $H(pk_U)$. Quando un nuovo voto viene ricevuto, l'Authenticator verifica se tale identificativo è già presente nella mappa. In caso affermativo, la richiesta viene immediatamente rifiutata; in caso contrario il voto viene accettato e l'identificativo viene inserito nella struttura. Questo meccanismo impedisce a un utente legittimo di votare più volte utilizzando lo stesso certificato e la stessa coppia di chiavi. \\
+La proprietà è garantita assumendo che l'Authenticator operi correttamente, che la VoterMap non venga alterata da soggetti esterni e che un elettore non possa ottenere più certificati validi associati alla stessa votazione.
 
 \paragraph{Integrità}:
+La proprietà di integrità è garantita mediante l'utilizzo delle firme digitali su tutti i messaggi critici del protocollo. In particolare, il voto trasmesso dall'Utente all'Authenticator è accompagnato da una firma digitale generata mediante la chiave privata dell'Utente. L'Authenticator verifica tale firma utilizzando la corrispondente chiave pubblica ottenuta dal certificato dell'Utente. Analogamente, il messaggio inoltrato dall'Authenticator al Server viene firmato dall'Authenticator e verificato dal Server. \\
+La proprietà è garantita assumendo che le chiavi private degli attori onesti (Utente, Authenticator e Server) rimangano segrete. \\
+L'integrità del contenuto del voto durante la trasmissione è garantita dal protocollo. Tuttavia, il protocollo assume che il Server, una volta decifrato il voto, si comporti in maniera semi-honest e non alteri volontariamente il risultato dello scrutinio. Pertanto l'integrità del risultato finale dipende parzialmente da tale assunzione di fiducia.
+
 
 \paragraph{Segretezza}:
 

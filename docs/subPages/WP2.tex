@@ -117,7 +117,7 @@ Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compi
 	\end{aligned}
 	$$
 	\item L'Utente trasmette alla CA il certificato non firmato, richiedendone la certificazione. $$Cert_{unsigned}(U)$$
-	\item La CA verifica che la matricola ricevuta è valida.
+	\item La CA verifica che la matricola ricevuta è valida. In generale, qualsiasi Utente potrebbe fingersi un altro inserendo la sua matricola del campo Subject. Assumiamo che questo non accada, ma nel caso accadesse chiunque potrebbe fingersi qualcun'altro e votare al suo posto una volta ottenuto il certificato.
 	\item La CA calcola l'hash del certificato non firmato: $$H(Cert_{unsigned}(U))$$
 	\item La CA genera una firma digitale del messaggio $$\sigma=Sign_{sk_{CA}}(H(Cert_{unsigned}(U)))$$
 	\item La CA aggiunge la firma al certificato non firmato $$Cert(U)=(Cert_{unsigned}(U),\ \sigma)$$
