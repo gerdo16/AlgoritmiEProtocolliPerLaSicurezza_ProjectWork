@@ -32,12 +32,25 @@ La proprietà è quindi soddisfatta solo parzialmente e dipende dall'assunzione 
 
 \subsection{Analisi degli attacchi del Threat Model}
 
-
 \paragraph{Identity Theft}:
+In questo attacco, un soggetto malevolo tenta di votare spacciandosi per un elettore legittimo. L'obiettivo dell'attaccante è autenticarsi presso l'Authenticator utilizzando l'identità di un altro utente e quindi esprimere un voto a suo nome. \\
+Nel protocollo proposto, per poter trasmettere un voto valido è necessario possedere un certificato digitale valido rilasciato dalla Certificate Authority e produrre una firma digitale verificabile mediante la chiave pubblica contenuta nel certificato stesso. Quando riceve una richiesta di voto, l'Authenticator verifica dapprima la validità del certificato e successivamente la correttezza della firma digitale associata al messaggio. \\
+Di conseguenza, un attaccante che non possiede la chiave privata dell'utente legittimo non è in grado di generare una firma valida e la richiesta di voto viene rifiutata dall'Authenticator. \\
+L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che le chiavi private degli utenti rimangano segrete e che la Certificate Authority rilasci certificati esclusivamente a soggetti legittimati.
 
 \paragraph{Spoofing Authenticator}:
+In questo attacco, un soggetto malevolo tenta di impersonare l'Authenticator legittimo del sistema. L'obiettivo dell'attaccante è indurre l'Utente a comunicare con un Authenticator fittizio, così da intercettare le richieste di voto o impedire il corretto svolgimento della procedura di votazione. \\
+Nel protocollo proposto, prima di trasmettere informazioni sensibili all'Authenticator, l'Utente riceve e verifica il certificato digitale dell'Authenticator, firmato dalla Certificate Authority del sistema. L'Utente verifica quindi la validità del certificato utilizzando la chiave pubblica della CA distribuita durante la fase preliminare del sistema. \\
+Un attaccante che tenti di impersonare l'Authenticator dovrebbe quindi presentare un certificato valido associato all'identità dell'Authenticator. Tuttavia, non possedendo la chiave privata della CA, non è in grado di generare una firma valida sul certificato fraudolento. La verifica del certificato da parte dell'Utente fallisce e la comunicazione viene interrotta. \\
+L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che la chiave privata della Certificate Authority rimanga segreta e che gli Utenti verifichino correttamente il certificato ricevuto prima di instaurare qualsiasi comunicazione con l'Authenticator. \\
+Si osserva che la protezione contro questo attacco dipende dalla corretta verifica dei certificati da parte degli Utenti. Qualora un Utente ignorasse l'esito della verifica del certificato o accettasse un certificato non valido, potrebbe comunque essere indotto a comunicare con un Authenticator fraudolento.
 
 \paragraph{Spoofing Server}:
+In questo attacco, un soggetto malevolo tenta di impersonare il Server legittimo del sistema con l'obiettivo di ricevere i voti destinati all'urna elettronica. In questo modo l'attaccante potrebbe impedire la registrazione dei voti o alterare il corretto svolgimento della votazione. \\
+Nel protocollo proposto, l'Authenticator conosce il certificato digitale del Server firmato dalla Certificate Authority e verifica la validità di tale certificato prima di instaurare qualsiasi comunicazione. Inoltre, il voto viene cifrato utilizzando la chiave pubblica del Server contenuta nel certificato verificato. \\
+Un attaccante che tenti di sostituirsi al Server dovrebbe quindi presentare un certificato associato all'identità del Server e firmato dalla Certificate Authority. Tuttavia, non possedendo la chiave privata della CA, non è in grado di generare una firma valida sul certificato fraudolento. La verifica del certificato fallisce e l'Authenticator interrompe la comunicazione. \\
+Anche qualora l'attaccante riuscisse a intercettare il voto cifrato destinato al Server, non potrebbe decifrarlo poiché il voto è stato cifrato utilizzando la chiave pubblica del Server legittimo e solo quest'ultimo possiede la corrispondente chiave privata necessaria per la decifrazione. \\
+L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che la chiave privata della Certificate Authority rimanga segreta, che l'Authenticator verifichi correttamente il certificato del Server e che la chiave privata del Server non venga compromessa.
 
 \paragraph{Man-in-the-Middle}:
 
