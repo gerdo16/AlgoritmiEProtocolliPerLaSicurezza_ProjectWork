@@ -1,6 +1,5 @@
 \subsection{Analisi delle proprietà di sicurezza}
 
-
 \paragraph{Autenticità}:
 Ogni Utente intenzionato a votare possiede un certificato digitale valido firmato dalla Certificate Authority. L'Authenticator verifica la validità del certificato e infine verifica la firma sul voto cifrato. Solo l'Utente in possesso della chiave privata $sk_U$ può produrre una firma valida, quindi un attaccante non può impersonare un elettore senza compromettere la sua chiave privata. \\
 La proprietà è garantita solo se assumiamo che, in fase di richiesta certificato utente (2.2), tutti gli Utenti inseriscano nel campo Subject del certificato non firmato la propria matricola corretta. Se così non fosse, chiunque potrebbe fingersi qualcun'altro.
@@ -94,7 +93,10 @@ Tuttavia, il protocollo è progettato in modo che il Server non riceva informazi
 Di conseguenza, pur conoscendo il contenuto dei voti, il Server non dispone delle informazioni necessarie per ricostruire l'associazione tra identità e preferenza di voto. \\
 La proprietà di segretezza risulta quindi garantita nei confronti di un Server curioso assumendo che l'Authenticator non collabori con esso e che i messaggi inoltrati non contengano informazioni identificative aggiuntive.
 
-\subsection{Analisi delle assunzioni di fiducia}
-
-
 \subsection{Migliorie future}
+
+\paragraph{Introduzione della verificabilità universale}
+
+\paragraph{Introduzione della revocabilità o sostituzione del voto}
+
+\paragraph{Risoluzione del replay attack nella comunicazione A $\rightarrow$ S}
