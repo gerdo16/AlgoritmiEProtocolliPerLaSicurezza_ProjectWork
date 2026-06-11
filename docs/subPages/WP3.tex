@@ -53,12 +53,32 @@ Anche qualora l'attaccante riuscisse a intercettare il voto cifrato destinato al
 L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che la chiave privata della Certificate Authority rimanga segreta, che l'Authenticator verifichi correttamente il certificato del Server e che la chiave privata del Server non venga compromessa.
 
 \paragraph{Man-in-the-Middle}:
+In questo attacco, un soggetto malevolo si posiziona tra due entità che stanno comunicando e intercetta i messaggi scambiati. L'obiettivo dell'attaccante è modificare il contenuto dei messaggi in transito senza che i destinatari si accorgano della manipolazione. Nel contesto del protocollo di voto, l'attaccante potrebbe tentare di modificare il voto espresso dall'Utente oppure alterare i messaggi scambiati tra Authenticator e Server. \\
+Nel protocollo proposto, tutti i messaggi critici sono accompagnati da una firma digitale. In particolare, il voto trasmesso dall'Utente è firmato mediante la chiave privata dell'Utente $sk_U$, mentre il messaggio inoltrato dall'Authenticator al Server è firmato mediante la chiave privata dell'Authenticator $sk_A$. I destinatari verificano sempre tali firme utilizzando le corrispondenti chiavi pubbliche ottenute dai certificati validati dalla Certificate Authority. \\
+Se un attaccante modificasse anche un solo bit del messaggio intercettato, la verifica della firma digitale fallirebbe e il messaggio verrebbe immediatamente scartato. Di conseguenza, l'attaccante non può alterare il contenuto dei messaggi senza essere rilevato. \\
+Inoltre, i voti vengono trasmessi in forma cifrata mediante la chiave pubblica del Server. Pertanto, anche se l'attaccante riuscisse ad intercettare il traffico, non potrebbe conoscere il contenuto del voto e, non possedendo la chiave privata $sk_U$ dell'utente, non potrebbe generare un nuovo voto valido da sostituire a quello originale. \\
+L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che le chiavi private degli attori onesti rimangano segrete e che gli algoritmi crittografici utilizzati siano computazionalmente sicuri.
 
 \paragraph{Replay Attack}:
+In questo attacco, un soggetto malevolo intercetta un messaggio valido trasmesso durante il protocollo e lo reinvia successivamente con l'obiettivo di ottenere un effetto non autorizzato. Nel contesto del sistema di voto, l'attaccante potrebbe tentare di reinviare un messaggio di votazione precedentemente osservato per fare in modo che un voto venga conteggiato più volte. \\
+\textbf{Replay del messaggio di voto U $\rightarrow$ A.} Un attaccante potrebbe intercettare un messaggio di voto valido inviato da un Utente all'Authenticator e ritrasmetterlo successivamente. Tuttavia, dopo la registrazione del primo voto, l'identificativo dell'Utente $H(pk_U)$ viene inserito nella VoterMap. Pertanto, quando il messaggio viene ricevuto nuovamente, l'Authenticator rileva che l'elettore ha già votato e rifiuta immediatamente la richiesta. Il replay non consente quindi di registrare voti multipli. \\
+\textbf{Replay del messaggio A $\rightarrow$ S.} Un attaccante potrebbe intercettare il messaggio con cui l'Authenticator inoltra il voto al Server e ritrasmetterlo una o più volte. In questo caso la resistenza all'attacco non è prevista dal protocollo progettato. Infatti, se il Server subisse un attacco di questo tipo, non se ne accorgerebbe e salverebbe il voto di un Utente due (o più!) volte. In fase di progettazione del protocollo è stata involontariamente trascurata questa problematica che verrà affrontata nella sezione Migliorie future. \\
+\textbf{Replay dei messaggi di ACK.} Un attaccante potrebbe inoltre ritrasmettere messaggi di conferma già osservati. Tuttavia tali messaggi non provocano la registrazione di nuovi voti né modificano lo stato del sistema. Possono al più indurre confusione negli attori coinvolti, ma non compromettono l'autenticità, l'integrità o l'unicità della votazione. \\
+Nel complesso, il protocollo non risulta resistente agli attacchi di replay, in particolar modo nella trasmissione del voto cifrato dall'Authenticator al Server. Negli altri casi, questo tipo di attacco non compromette la sicurezza del protocollo.
 
 \paragraph{Eavesdropping}:
+In questo attacco, un soggetto malevolo osserva passivamente le comunicazioni scambiate tra gli attori del protocollo senza modificarne il contenuto. L'obiettivo dell'attaccante è ottenere informazioni riservate, in particolare il voto espresso da un elettore o l'associazione tra identità e voto. \\
+\textbf{Intercettazione del messaggio U $\rightarrow$ A.} Quando l'Utente trasmette il proprio voto all'Authenticator, il voto viene cifrato mediante la chiave pubblica del Server $pk_S$, e poi dalla chiave pubblica dell'Authenticator $pk_A$. Pertanto, anche se un attaccante intercettasse il messaggio, non sarebbe in grado di recuperare il contenuto del voto poiché non possiede le chiavi private del Server e dell'Authenticator. \\
+\textbf{Intercettazione del messaggio A $\rightarrow$ S.} L'Authenticator inoltra al Server il voto già cifrato con la chiave pubblica del Server. Anche in questo caso l'attaccante può osservare esclusivamente il ciphertext e non è in grado di risalire al voto in chiaro. Inoltre il messaggio non contiene informazioni che identificano direttamente l'Utente che ha espresso il voto. \\
+\textbf{Intercettazione dei messaggi di verifica individuale.} Durante la procedura di verificabilità individuale, il voto viene restituito all'Utente sotto forma di ciphertext cifrato con la chiave pubblica $pk_U$ dell'Utente stesso. Di conseguenza un eventuale attaccante che intercettasse il messaggio non potrebbe recuperare il contenuto del voto senza conoscere la chiave privata dell'Utente. \\
+Nel complesso, l'attacco di eavesdropping non consente di ottenere informazioni sul contenuto dei voti poiché tutti i dati sensibili vengono trasmessi in forma cifrata. La proprietà di segretezza è quindi garantita assumendo che gli algoritmi crittografici utilizzati siano sicuri e che le chiavi private degli attori onesti rimangano segrete.
 
 \paragraph{Traffic Analysis}:
+In questo attacco, un soggetto malevolo osserva passivamente il traffico di rete senza tentare di decifrare o modificare i messaggi. L'obiettivo è ricavare informazioni indirette analizzando metadati quali il momento di trasmissione dei messaggi, la frequenza delle comunicazioni, il numero di pacchetti scambiati o la loro dimensione. \\
+Nel protocollo proposto, il contenuto dei voti è protetto mediante cifratura asimmetrica e pertanto non è accessibile ad un osservatore esterno. Tuttavia, un attaccante che monitori il traffico potrebbe comunque osservare che un determinato Utente ha instaurato una comunicazione con l'Authenticator e dedurre che tale Utente ha partecipato alla votazione. \\
+Si osserva che, assumendo l'utilizzo di RSA-OAEP, la dimensione del ciphertext dipende dalla dimensione della chiave pubblica utilizzata e non dal contenuto del voto. Pertanto l'osservazione della lunghezza dei pacchetti non consente di distinguere direttamente tra differenti preferenze di voto. \\
+La proprietà di segretezza risulta quindi sostanzialmente preservata rispetto a questo attacco. Rimane tuttavia possibile dedurre informazioni ausiliarie, come la partecipazione di un Utente alla votazione o il numero complessivo di voti espressi.
+
 
 \paragraph{Authenticator Curioso}:
 
@@ -67,3 +87,5 @@ L'attacco risulta quindi mitigato dal protocollo sotto l'assunzione che la chiav
 
 \subsection{Analisi delle assunzioni di fiducia}
 
+
+\subsection{Migliorie future}
