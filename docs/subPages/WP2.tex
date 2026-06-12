@@ -17,6 +17,7 @@ In questa sezione viene discusso nel dettaglio il protocollo progettato. In ques
 	\caption{Algoritmi utilizzati nel protocollo per le votazioni digitali sicure.}
 	\label{tab:algoritmi}
 \end{table}
+Inoltre lo standard dei certificati scelto è X.509 per la distribuzione delle chiavi pubbliche (PKI), e per la sua capacità di includere campi personalizzati (come il campo Role) che sono utili per distinguere i diversi ruoli all'interno del sistema di voto.
 
 \subsection{Fase preliminare del sistema}
 In questa fase vengono generati i certificati degli attori principale del sistema, ovvero il Server e l'Authority. Inoltre, questa fase garantisce la consistenza dei certificati nel tempo, con un meccanismo di ricreazione.
@@ -379,15 +380,17 @@ I 2 messaggi previsti in questo scambio sono i seguenti:
 	Se la verifica della firma restituisce un risultato positivo, l'utente decifra il voto cifrato $c$ con la propria chiave privata $sk_U$ per ottenere il voto in chiaro:
 	$$ v = \text{Dec}_{sk_U}(c) = \text{Dec}_{sk_U}(\text{Enc}_{pk_U}(v)) $$
 	Si evidenzia il fatto che solo l'utente può decifrare il voto cifrato perchè è l'unico possessore della chiave privata $sk_U$ che gli permette di decifrare $c$, in questo modo si garantisce la riservatezza del voto anche durante la fase di verifica individuale, infatti A non può leggere il voto cifrato associato all'utente, ma solo restituirlo all'utente stesso.\\
-	Possiamo dire che U esegue $v == v^*$, dove $v^*$ è il voto espresso in precedenza, ossia il voto che aveva intenzione di esprimere. Quindi se il voto decifrato è uguale al voto che l'utente aveva espresso in precedenza, allora l'utente ha la certezza che il voto è stato registrato correttamente nel server, altrimenti se il voto decifrato è diverso da quello espresso in precedenza, significa che c'è stato un errore nella registrazione del voto. Ciò è vero sotto l'assunzione che il Server operi rispettando il protocollo e non alteri i voti ricevuti dall'Authenticator.
+	Possiamo dire che U esegue $v == v^*$, dove $v^*$ è il voto espresso in precedenza, ossia il voto che aveva intenzione di esprimere. Quindi se il voto decifrato è uguale al voto che l'utente aveva espresso in precedenza, allora l'utente ha la certezza che il voto è stato registrato correttamente nel server, altrimenti se il voto decifrato è diverso da quello espresso in precedenza, significa che c'è stato un errore nella registrazione del voto. Ciò è vero sotto l'assunzione precedentemente presentata, per la quale il Server operi rispettando il protocollo e non alteri i voti ricevuti dall'Authenticator.
 \end{enumerate}
 
 
 \subsection{Verifica universale del voto}
 La verificabilità universale non è completamente garantita dal protocollo proposto. Al termine dello scrutinio il Server pubblica il numero totale di voti validi e il risultato finale della votazione, consentendo di verificare la coerenza tra il numero di voti registrati e il numero di elettori autorizzati dall'Authenticator. Di conseguenza, un utente esterno può conoscere il risultato della votazione ma non può verificare indipendentemente che esso sia stato ottenuto conteggiando correttamente tutti i voti validi registrati dal sistema (Ad esempio: il Server, una volta decifrato un voto v="SI", potrebbe decidere di conteggiarlo tra i NO). \\
 Quindi la correttezza del risultato finale dipende dall'assunzione che il Server operi in modo semi-honest e rispetti il protocollo previsto. \\ \\
-Al termine delle votazioni, il server esegue lo scrutinio e pubblica il risultato finale firmato digitalmente. $$(\# SI,\ \# NO,\ \sigma_S)$$ dove $$\sigma_S=Sign_{sk_S}(H(\# SI,\ \# NO))$$
+Al termine delle votazioni, il server esegue lo scrutinio e pubblica il risultato finale firmato digitalmente. $$(\# SI,\ \# NO,\ \sigma_S)$$ dove $$\sigma_S=Sign_{sk_S}(\# SI,\ \# NO)$$
 Il risultato è quindi visibile a tutti e chiunque può verificarne l'integrità tramite firma del Server.
+In particolare si esegue la verifica della firma digitale del risultato con la chiave pubblica di S:
+$$ V_{pk_S}((\# SI,\ \# NO), \sigma_S) $$
 	
 	
 	
