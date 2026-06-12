@@ -45,7 +45,7 @@ class Authenticator:
             raise RuntimeError("L'authenticator non ha un certificato da firmare!")
 
         print(f"[Authenticator] Authenticator {self.name} chiede alla CA {self.ca.getName()} di firmare il suo certificato...")
-        self.ca.sign(self.cert)
+        self.cert = self.ca.sign(self.cert)
 
 
     def __str__(self):

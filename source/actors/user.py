@@ -63,6 +63,7 @@ class User:
         self.cert = self.ca.sign(self.cert)
 
 
+    
 
 
     # ========================== Fase Trasmissione voto ==========================

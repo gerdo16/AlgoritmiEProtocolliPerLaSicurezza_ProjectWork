@@ -23,7 +23,7 @@ Inoltre lo standard dei certificati scelto è X.509 per la distribuzione delle c
 In questa fase vengono generati i certificati degli attori principale del sistema, ovvero il Server e l'Authority. Inoltre, questa fase garantisce la consistenza dei certificati nel tempo, con un meccanismo di ricreazione.
 
 \begin{enumerate}
-	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e authority). Dopo la fase di emissione dei certificati, la CA non partecipa al protocollo di voto.
+	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e Authenticator). Dopo la fase di emissione dei certificati, la CA non partecipa al protocollo di voto.
 	\item \textbf{Certificazione del Server}: 
 		\begin{enumerate}
 			\item Il Server genera una coppia di chiavi (privata $sk_S$, pubblica $pk_S$).
@@ -52,10 +52,10 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 			\item La CA trasmette il certificato firmato Cert(S) al Server.
 		\end{enumerate}
 		
-	\item \textbf{Certificazione dell'Authority}:
+	\item \textbf{Certificazione dell'Authenticator}:
 		\begin{enumerate}
-			\item L'Authority genera una coppia di chiavi (privata $sk_A$, pubblica $pk_A$).
-			\item L'Authority crea un certificato non firmato nel formato x509, composto dai campi:
+			\item L'Authenticator genera una coppia di chiavi (privata $sk_A$, pubblica $pk_A$).
+			\item L'Authenticator crea un certificato non firmato nel formato x509, composto dai campi:
 			$$
 			\begin{aligned}
 				Cert_{unsigned}(A) = (& \\
@@ -82,15 +82,15 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 		
 	\item \textbf{Scambio dei certificati}:
 		\begin{itemize}
-			\item Il Server trasmette il suo certificato firmato Cert(S) all'Authority,
-			\item L'Authority trasmette il suo certificato firmato al Server.
+			\item Il Server trasmette il suo certificato firmato Cert(S) all'Authenticator,
+			\item L'Authenticator trasmette il suo certificato firmato al Server.
 		\end{itemize}	
 		
 	\item \textbf{Eventuale rinnovo dei certificati}: \\
 	Il sistema non implementa meccanismi dinamici di revoca anticipata dei certificati. La validità dei certificati è limitata temporalmente meediante i campi NotBefore e NotAfter.
 		\begin{itemize}
 			\item Se scade il certificato del Server, viene ripetuta la fase di certificazione del Server e scambio dei certificati.
-			\item Se scade il certificato dell'Authority, viene ripetuta la fase di certificazione dell'Authority e scambio dei certificati.
+			\item Se scade il certificato dell'Authenticator, viene ripetuta la fase di certificazione dell'Authenticator e scambio dei certificati.
 		\end{itemize}
 \end{enumerate}
 
@@ -127,7 +127,7 @@ Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compi
 
 
 \subsection{Fase handshake}
-In questa fase l'utente possiede un certificato valido e vuol comunicare all'Authenticator la sua intenzione a votare, dovendo però verificare le identità dell'Authority e del Server.
+In questa fase l'utente possiede un certificato valido e vuole comunicare all'Authenticator la sua intenzione a votare, dovendo però verificare le identità dell'Authenticator e del Server.
 
 \begin{enumerate}
 	\item L'Utente trasmette una Vote Request all'Authenticator. Questo messaggio è nel formato:
@@ -274,26 +274,26 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
 			
 			\item \textbf{Preparazione ACK: } S prepara un pacchetto ricevuta di ACK cifrato da inviare all'Authenticator.
-			$$ c_S=Enc_{pk_A}(ACK\|nonce),\ \sigma_S=Sign_{sk_S}(c) \to (c_S||\sigma_S) $$
+			$$ c_S=Enc_{pk_A}(ACK\|nonce),\ \sigma_S=Sign_{sk_S}(c_S) \to (c_S||\sigma_S) $$
 			Dove ACK può essere ad esempio "ACK" e nonce è il nonce ricevuto in precedenza.\\
 			Lo schema seguito è sempre Encrypt-then-Sign, infatti S cifra prima il messaggio di ACK con la chiave pubblica di A e poi firma il cifrato con la propria chiave privata $sk_S$.
 			
 			\item \textbf{Inoltro dell'ACK: } S invia all'Authenticator la ricevuta indicante il completamento del processo
-			$$ (c||\sigma_S) $$
+			$$ (c_S||\sigma_S) $$
 		\end{enumerate}
 		
 	\subsubsection{A $\to$ U: ACK e Finalizzazione}
 		\begin{enumerate}
-			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
-			$$ V_{pk_S}(c, \sigma_S) $$
+			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c_S||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
+			$$ V_{pk_S}(c_S, \sigma_S) $$
 			\begin{itemize}
 				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dal server, pertanto si scarta immediatamente l'ACK e si notifica il mittente che l'operazione è stata annullata.
 				
 				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dal server perchè solo lui conosce la propria chiave privata $sk_S$ che gli ha permesso di generare la firma digitale $\sigma_S$.
 			\end{itemize}
 			
-			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
-			$$ (ACK\|nonce) = \text{Dec}_{sk_A}(c) $$
+			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c_S$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
+			$$ (ACK\|nonce) = \text{Dec}_{sk_A}(c_S) $$
 			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server. Inoltre deve controllare che il nonce ricevuto in questo messaggio di ACK sia lo stesso che aveva inviato al server, in modo da garantire che l'ACK ricevuto è effettivamente la risposta al voto inviato e non un messaggio di ACK vecchio o di un altro voto.
 
 			\item \textbf{Salvataggio dell'hash dell'elettore:} Solo dopo aver verificato che il voto è stato registrato correttamente, A può procedere a inserire l'hash della chiave pubblica dell'utente $H(pk_U)$ nella mappa degli utenti che hanno già votato, in questo modo si impedisce il doppio voto da parte dello stesso elettore.
