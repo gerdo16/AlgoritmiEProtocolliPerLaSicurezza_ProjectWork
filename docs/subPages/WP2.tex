@@ -229,18 +229,21 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 		\begin{enumerate}
 			\item \textbf{Preparazione del messaggio per S:} Arrivati a questo punto l'authenticator ha ricavato l'informazione del voto cifrato $c$ dal $C_{final}$, e questo sarà il messaggio che deve inviare con uno schema asimmetrico Encrypt-then-Sign al server per l'invio del voto. Poichè il voto non è in chiaro bensì è cifrato con la chiave pubblica del server, singnifica che A non può leggere il contenuto, infatti si ricorda che il chipertext è il seguente: $c=\text{Enc}_{pk_S}(v)$.\\
 			Quindi A prepara il pacchetto per S secondo lo schema sopra detto. Quindi dovrebbe costruire prima il cifrato interno, ossia $ \text{Enc}_{pk_S}(c) = \text{Enc}_{pk_S}(\text{Enc}_{pk_S}(v)) $ e firmarlo. Tuttavia l'applicazione di un'ulteriore cifratura asimmetrica su un dato già cifrato risulterebbe inutile e ridondante, e quindi per rispettare il requisito di efficienza è possibile evitare di cifrare nuovamente e considerare direttamente che il messaggio cifrato è $c$.\\
-			Adesso con la propria chiave privata, A produce la seguente firma:
-			$$ \sigma_{A}=\text{Sign}_{sk_A}(c) =  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)) $$
-			In questo modo il messaggio finale è esattamente $(c \| \sigma_{A})$, il quale espandendolo evidenzia che conserva l'informazione del voto cifrato dall'utente nella fase iniziale:
-			$$ \boxed{(c \| \sigma_{A})} = (c \| \text{Sign}_{sk_A}(c)) = (\underbrace{ \text{Enc}_{pk_S}(v)}_{\text{Creato da User}} \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)) )$$
+			Adesso con la propria chiave privata, A potrebbe produrre la firma $ \sigma_{A}=\text{Sign}_{sk_A}(c) =  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)) $, tuttavia si sceglie di usare un nonce per evitare replay attack (viene spiegato meglio nel WP3). Pertanto A, prima di produrre la sua firma, genera un nonce univoco per il voto $c$ e produce la seguente firma:
+			$$ \sigma_{A} = \text{Sign}_{sk_A}(c \| \text{nonce}) = \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v) \| nonce) $$
+			In questo modo il messaggio può essere usato solo una volta proprio perchè quel nonce si può usare solo una volta. Al passaggio successivo in S riceve questo nonce si esplicita meglio perchè si può usare solo una volta.\\
+			In questo modo il messaggio finale ($pck$) deve essere esattamente $(c \| nonce\| \sigma_{A})$, il quale espandendolo evidenzia che conserva l'informazione del voto cifrato dall'utente nella fase iniziale:
+			$$ \boxed{(c\| nonce \| \sigma_{A})} = (\underbrace{ \text{Enc}_{pk_S}(v)}_{\text{Creato da User}}\| nonce \|  \text{Sign}_{sk_A}(\text{Enc}_{pk_S}(v)\| nonce)\ )$$
+			Si può notare che il nonce viene inviato in chiaro, ma questo non risulta essere un problema perchè il nonce non contiene informazioni sensibili, e inoltre poichè è stato inserito nella firma digitale, un malintenzionato non può modificarlo senza invalidare la firma stessa. Questo garantisce che il pck sia sempre univoco e non possa essere riutilizzato in un attacco di replay.
 			
-			\item \textbf{Buffer di inoltro:} Adesso A è pronto per inviare ad S il voto firmato $(c \| \sigma_{A})$.\\
+			\item \textbf{Buffer di inoltro:} Adesso A è pronto per inviare ad S il voto firmato $(c\| nonce \| \sigma_{A})$.\\
 			Tuttavia non manda subito il pacchetto al server, bensì lo inserisce in un buffer temporaneo, ossia una mappa in memoria in cui associa temporaneamente l'identificativo dell'utente al rispettivo pacchetto, al fine di smistare correttamente in seguito le ricevute di ritorno (ACK del server).
-			$$ \text{Buffer: } [ID_U \to pck]=[\text{Hash}(pk_U) \to (c \| \sigma_{A})] $$
+			$$ \text{Buffer: } [ID_U \to pck]=[\text{Hash}(pk_U) \to (c\| nonce \| \sigma_{A})] $$
 			Quindi attende un certo intervallo di tempo, oppure il raggiungimento di un numero prestabilito di voti (batching), prima di inoltrarli al Server. Prima dell'invio effettivo, l'Authenticator estrae i pacchetti dalla mappa e ne effettua uno shuffle.\\
-			Questa contromisura è essenziale per mitigare le vulnerabilità legate all'analisi del traffico temporale (Timing Attack), impedendo a un osservatore passivo di correlare l'arrivo del pacchetto da U con la successiva trasmissione verso S.
+			Questa contromisura è essenziale per mitigare le vulnerabilità legate all'analisi del traffico temporale (Timing Attack), impedendo a un osservatore passivo di correlare l'arrivo del pacchetto da U con la successiva trasmissione verso S.\\
+			Poichè viene usato un buffer per smistare in maniera random i pacchetti da A a S, non era utile utilizzare un timestamp per mitigare attacchi di replay, perchè se i pacchetti fossero preparati col timestamp, non si potrebbe garantire l'ordine di arrivo. Tuttavia era possibile preparare il pck solo dopo aver estratto $c$ dal buffer, in questo modo si sarebbe potuto inserire un timestamp invece del nonce, ma si è preferito usare il nonce per evitare di dover gestire la sincronizzazione degli orologi tra A e S, che avrebbe potuto introdurre complessità aggiuntive e potenziali vulnerabilità se non gestita correttamente.
 			
-			\item \textbf{Inoltro effettivo del voto a S:} Una volta prelevato dal buffer di inoltro uno degli item $(c \| \sigma_{A})$ associato all'ID dello user sorgente, può inviare il pacchetto $(c \| \sigma_{A})$ a S, conservando l'informazione che è stato mandato il voto dell'utente con quel determinato ID per poterlo inserire successivamente nella mappa degli utenti, dopo aver ricevuto l'ACK da parte del server. L'Authenticator trasmette un solo item alla volta, attendendo la ricezione dell'ACK. Solamente ad ACK ricevuto procede con la trasmissione dell'item successivo.
+			\item \textbf{Inoltro effettivo del voto a S:} Una volta prelevato dal buffer di inoltro uno degli item $(c\| nonce \| \sigma_{A})$ associato all'ID dello user sorgente, può inviare il pacchetto $(c\| nonce \| \sigma_{A})$ a S, conservando l'informazione che è stato mandato il voto dell'utente con quel determinato ID per poterlo inserire successivamente nella mappa degli utenti, dopo aver ricevuto l'ACK da parte del server. L'Authenticator trasmette un solo item alla volta, attendendo la ricezione dell'ACK. Solamente ad ACK ricevuto procede con la trasmissione dell'item successivo.
 		\end{enumerate}
 	
 	
@@ -250,43 +253,48 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 		Per gestire il pacchetto ricevuto da A, deve rispettare lo schema asimmetrico Encrypt-then-Sign in ricezione.
 		
 		\begin{enumerate}
-			\item \textbf{Integrità e autenticità del messaggio:} Il server riceve il pacchetto $(c \| \sigma_{A})$ e per rispettare lo schema asimmetrico usato, controlla prima la firma digitale quindi l'integrità del messaggio e l'autenticità dell'entità che l'ha mandato.\\
+			\item \textbf{Controllo del nonce:} Il server riceve da A il seguente pacchetto: $(c\| nonce \| \sigma_{A})$. Prima di procedere con la verifica della firma digitale, S estrae e controlla che il nonce ricevuto non sia già stato usato in precedenza. Se il nonce è già presente nella lista dei nonce usati, significa che il pacchetto è un tentativo di replay e quindi viene scartato immediatamente. Se invece il nonce è nuovo, S non lo aggiunge ancora alla lista dei nonce usati perchè deve prima verificare la firma.\\
+			Questo passaggio prevede che S mantenga una lista dei nonce usati, che può essere implementata come una semplice collezione in memoria. Per garantire l'efficienza, è possibile utilizzare una struttura dati come un set o una hash table per memorizzare i nonce, consentendo un controllo rapido dell'esistenza di un nonce specifico.
+			
+			\item \textbf{Integrità e autenticità del messaggio:} Il server quindi deve verificare il pacchetto $(c\| nonce \| \sigma_{A})$ e per rispettare lo schema asimmetrico usato, controlla prima la firma digitale quindi l'integrità del messaggio e l'autenticità dell'entità che l'ha mandato.\\
 			Quindi la prima operazione che effettua è la seguente verifica:
-			$$ V_{pk_A}(c, \sigma_{A}) $$
+			$$ V_{pk_A}(c \| nonce, \sigma_{A}) $$
 			\begin{itemize}
 				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dall'authenticator, pertanto si scarta immediatamente il voto e si notifica il mittente che l'operazione è stata annullata.
 				
 				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dall'authenticator perchè solo lui conosce la propria chiave privata $sk_A$ che gli ha permesso di generare la firma digitale $\sigma_A$.
 			\end{itemize}
-			Questa è il primo step per lo schema Encrypt-then-Sign in ricezione, finalizzato a garantire che il voto provenga dall'intermediario autorizzato (l'authenticator).
+			Questa è il primo step per lo schema Encrypt-then-Sign in ricezione, finalizzato a garantire che il voto provenga dall'intermediario autorizzato (l'authenticator).\\
+			Quindi se la firma è valida, S può salvare il nonce nella lista dei nonce usati, in modo da prevenire futuri tentativi di replay con lo stesso pacchetto.
 			
 			\item \textbf{Estrazione del voto:} Poiché l'Authenticator non ha applicato una seconda cifratura (per preservare l'efficienza), il Server può procedere direttamente alla decifrazione del messaggio $c$. S utilizza la propria chiave privata $sk_S$ per ottenere il plaintext $v$:
 			$$ v=\text{Dec}_{sk_S}(c)= \text{Dec}_{sk_S}(\text{Enc}_{pk_S}(v)) $$
-			In questo modo S ottiene la preferenza espressa dall'utente ("SI" o "NO") senza conoscere l'identità del votante, poiché $c$ gli è stato inoltrato da A in modo anonimizzato.
+			In questo modo S ottiene la preferenza espressa dall'elettore ("SI" o "NO") senza conoscere l'identità del votante, poiché $c$ gli è stato inoltrato da A in modo anonimizzato.
 			
 			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
 			
 			\item \textbf{Preparazione ACK: } S prepara un pacchetto ricevuta di ACK cifrato da inviare all'Authenticator.
-			$$ c=Enc_{pk_A}(ACK),\ \sigma_S=Sign_{sk_S}(c) \to (c||\sigma_S) $$
+			$$ c_S=Enc_{pk_A}(ACK\|nonce),\ \sigma_S=Sign_{sk_S}(c_S) \to (c_S||\sigma_S) $$
+			Dove ACK può essere ad esempio "ACK" e nonce è il nonce ricevuto in precedenza.\\
 			Lo schema seguito è sempre Encrypt-then-Sign, infatti S cifra prima il messaggio di ACK con la chiave pubblica di A e poi firma il cifrato con la propria chiave privata $sk_S$.
 			
 			\item \textbf{Inoltro dell'ACK: } S invia all'Authenticator la ricevuta indicante il completamento del processo
-			$$ (c||\sigma_S) $$
+			$$ (c_S||\sigma_S) $$
 		\end{enumerate}
 		
 	\subsubsection{A $\to$ U: ACK e Finalizzazione}
 		\begin{enumerate}
-			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
-			$$ V_{pk_S}(c, \sigma_S) $$
+			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c_S||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
+			$$ V_{pk_S}(c_S, \sigma_S) $$
 			\begin{itemize}
 				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dal server, pertanto si scarta immediatamente l'ACK e si notifica il mittente che l'operazione è stata annullata.
 				
 				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dal server perchè solo lui conosce la propria chiave privata $sk_S$ che gli ha permesso di generare la firma digitale $\sigma_S$.
 			\end{itemize}
 			
-			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
-			$$ ACK = \text{Dec}_{sk_A}(c) $$
-			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server.
+			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c_S$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
+			$$ (ACK\|nonce) = \text{Dec}_{sk_A}(c_S) $$
+			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server. Inoltre deve controllare che il nonce ricevuto in questo messaggio di ACK sia lo stesso che aveva inviato al server, in modo da garantire che l'ACK ricevuto è effettivamente la risposta al voto inviato e non un messaggio di ACK vecchio o di un altro voto.
 
 			\item \textbf{Salvataggio dell'hash dell'elettore:} Solo dopo aver verificato che il voto è stato registrato correttamente, A può procedere a inserire l'hash della chiave pubblica dell'utente $H(pk_U)$ nella mappa degli utenti che hanno già votato, in questo modo si impedisce il doppio voto da parte dello stesso elettore.
 			$$ [H(pk_U),c'] \to \text{VoterMap} $$
