@@ -13,6 +13,7 @@ def generate_rsa_key_pair():
     )
     return sk, sk.public_key()
 
+""" cifra un messaggio con chiave pubblica RSA """
 def rsa_encrypt(public_key, plaintext: bytes) -> bytes:
     ciphertext = public_key.encrypt(
         plaintext,
@@ -24,6 +25,7 @@ def rsa_encrypt(public_key, plaintext: bytes) -> bytes:
     )
     return ciphertext
 
+""" decifra un messaggio con chiave privata RSA """
 def rsa_decrypt(private_key, ciphertext: bytes) -> bytes:
     plaintext = private_key.decrypt(
         ciphertext,
