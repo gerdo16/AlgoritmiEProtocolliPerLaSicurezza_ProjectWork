@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 class Certificate:
@@ -20,7 +21,7 @@ class Certificate:
             .not_valid_after(datetime.now(timezone.utc) + timedelta(days=30))
         )
 
-        self.signed = False
+        self._signed = False
         print("certificato creato")
 
 
@@ -29,12 +30,12 @@ class Certificate:
     
 
     def sign(self, private_key):
-        if self.signed:
+        if self._signed:
             print("Certificato già firmato!")
             return
         
         self.cert = self.cert.sign(private_key=private_key, algorithm=hashes.SHA256())
-        self.signed = True
+        self._signed = True
 
 
     def verify(self, ca_cert: Certificate):
@@ -53,3 +54,31 @@ class Certificate:
         except:
             return 0
 
+
+    """ TRASFORMA UN CERTIFICATO FIRMATO IN BYTE """
+    def to_bytes(self) -> bytes: 
+        if not self._signed:
+            raise RuntimeError("Solo i certificati firmati possono essere serializzati in DER")
+        return self.cert.public_bytes(Encoding.DER)
+    
+    """ TRASFORMA I BYTE RICEVUTI IN UN CERTIFICATO FIRMATO """
+    @classmethod
+    def from_bytes(cls, data: bytes) -> "Certificate":
+        instance = cls.__new__(cls)
+        instance.cert = x509.load_der_x509_certificate(data)
+        instance._signed = True
+
+        instance._subject = instance.cert.subject
+        return instance
+    
+    """ TRASFORMA UN CERTIFICATO NON FIRMATO IN BYTE """
+    def to_csr_bytes(self, private_key) -> bytes:
+        if self._signed:
+            raise RuntimeError("Il certificato è già firmato, usa to_bytes()")
+        csr = (
+            x509.CertificateSigningRequestBuilder()
+            .subject_name(self.cert.subject_name())
+            .sign(private_key, hashes.SHA256())
+        )
+        return csr.public_bytes(Encoding.DER)
+    

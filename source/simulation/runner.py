@@ -11,5 +11,4 @@ def runFullProtocol():
     cert_u = Certificate("gerardo", "ca", pk_u)
     #cert_u.sign(sk)
 
-    print(cert_ca.verify(cert_ca))
-    print(cert_u.verify(cert_ca))
+    
