@@ -1,3 +1,4 @@
 from simulation.runner import runFullProtocol
 
-runFullProtocol()
+if __name__ == "__main__":
+    runFullProtocol()
