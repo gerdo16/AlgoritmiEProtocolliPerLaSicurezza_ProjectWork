@@ -13,8 +13,31 @@ def generate_rsa_key_pair():
     )
     return sk, sk.public_key()
 
+def rsa_encrypt(public_key, plaintext: bytes) -> bytes:
+    ciphertext = public_key.encrypt(
+        plaintext,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return ciphertext
+
+def rsa_decrypt(private_key, ciphertext: bytes) -> bytes:
+    plaintext = private_key.decrypt(
+        ciphertext,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return plaintext
+
+
 """ crifra un messaggio con una chiave AES generata casualmente, e cifra la chiave AES con la chiave pubblica RSA """
-def encrypt(public_key, plaintext: bytes) -> bytes:
+def hybrid_encrypt(public_key, plaintext: bytes) -> bytes:
     # chiave AES casuale
     aes_key = os.urandom(32)
     
@@ -39,7 +62,7 @@ def encrypt(public_key, plaintext: bytes) -> bytes:
     
 
 """ decifra una chiave AES cifrata con RSA, e usa la chiave AES per decifrare il messaggio """
-def decrypt(private_key, data: bytes) -> bytes:
+def hybrid_decrypt(private_key, data: bytes) -> bytes:
     # Ottengo la chiave AES cifrata, il nonce e il cyphertext
     enc_key, nonce, ciphertext = unpack_fields(data, 3)
     
