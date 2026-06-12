@@ -1,7 +1,7 @@
 import crypto.asymmetric
 from models.certificate import Certificate
 from actors.user import User
-from actors.certificateauthority import CertificateAuthority
+from actors.certificateauthority import CertificationAuthority
 
 def runFullProtocol():
     #sk, pk = crypto.asymmetric.generate_rsa_key_pair()
@@ -13,14 +13,16 @@ def runFullProtocol():
     #cert_u = Certificate("gerardo", "ca", pk_u)
     #cert_u.sign(sk)
 
+    print("\n\n================================================================================================================")
+    print("================================== Inizio simulazione protocollo di votazione ==================================")
+    print("================================================================================================================\n\n")
 
-    print("\n\n=============== Inizio simulazione protocollo di votazione ===============\n\n")
-
-    ca = CertificateAuthority("University Voting CA")
+    ca = CertificationAuthority("University Voting CA", "vote.unisa.it")
+    ca.autoSignCertificate()
     #print(ca)
+
     sava = User("sava", "IE22700086")
     #print(sava)
-    
     sava.setCertificateAuthority(ca)
     sava.generateKeyPair()
     sava.generateUnsignedCertificate()

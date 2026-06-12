@@ -90,3 +90,12 @@ class Certificate:
         )
         return csr.public_bytes(Encoding.DER)
     
+
+    def __str__(self):
+        out = f"\n===Certificate===\n"
+        out += f" - Subject: {self.subject}\n"
+        out += f" - Issuer: {self.issuer}\n"
+        out += f" - Public Key: {self.cert.public_key()}\n"
+        out += f" - firmato: {self._signed}\n"
+        out += "===================\n"
+        return out

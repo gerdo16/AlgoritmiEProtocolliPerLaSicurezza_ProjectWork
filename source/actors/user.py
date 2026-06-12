@@ -1,6 +1,6 @@
 import crypto.asymmetric
 from models.certificate import Certificate
-from actors.certificateauthority import CertificateAuthority
+from actors.certificateauthority import CertificationAuthority
 
 class User:
     def __init__(self, name:str, matriculation_number:str):
@@ -8,7 +8,7 @@ class User:
         self.matriculation_number = matriculation_number
         self.sk, self.pk = None, None
         self.cert = None
-        self.ca: "CertificateAuthority" = None
+        self.ca: "CertificationAuthority" = None
         print(f"[User] Utente {self.name} creato con matricola {self.matriculation_number}")
 
     
@@ -24,7 +24,7 @@ class User:
     def getCertificateAuthority(self):
         return self.ca
 
-    def setCertificateAuthority(self, ca: "CertificateAuthority"):
+    def setCertificateAuthority(self, ca: "CertificationAuthority"):
         self.ca = ca
 
 
@@ -60,17 +60,18 @@ class User:
 
 
 
+
     # ========================== Fase Trasmissione voto ==========================
 
 
 
     def __str__(self):
-        out = f"\n===User {self.name}===\n"
+        out = f"\n=================================== User {self.name} ===================================\n"
         out += f" - Matricola: {self.matriculation_number}\n"
         out += f" - Public Key: {self.pk}\n"
         out += f" - Private Key: è privata non si può vedere :)\n"
         out += f" - Certificato: {self.cert}\n"
         out += f" - Certificato firmato: {self.cert.isSigned()}\n"
         out += f" - CA: {self.ca}\n"
-        out += "===================\n"
+        out += "=================================================================================\n"
         return out
