@@ -52,7 +52,7 @@ class Certificate:
             )
             return 1
         except:
-            return 0
+            return 0  # se il certificato non è firmato oppure fallisce la verifica, ritorno 0
 
 
     """ TRASFORMA UN CERTIFICATO FIRMATO IN BYTE """
