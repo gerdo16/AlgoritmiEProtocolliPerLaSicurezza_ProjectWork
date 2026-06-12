@@ -274,26 +274,26 @@ In questa fase l'utente possiede un certificato valido e vuol comunicare all'Aut
 			\item \textbf{Registrazione del voto e Verificabilità:} Il server verifica che $v$ faccia parte del dominio ammesso ($v\in\{"SI","NO"\}$). In caso positivo, il server incrementa il contatore delle preferenze corrispondenti.
 			
 			\item \textbf{Preparazione ACK: } S prepara un pacchetto ricevuta di ACK cifrato da inviare all'Authenticator.
-			$$ c_S=Enc_{pk_A}(ACK\|nonce),\ \sigma_S=Sign_{sk_S}(c_S) \to (c_S||\sigma_S) $$
+			$$ c_S=Enc_{pk_A}(ACK\|nonce),\ \sigma_S=Sign_{sk_S}(c) \to (c_S||\sigma_S) $$
 			Dove ACK può essere ad esempio "ACK" e nonce è il nonce ricevuto in precedenza.\\
 			Lo schema seguito è sempre Encrypt-then-Sign, infatti S cifra prima il messaggio di ACK con la chiave pubblica di A e poi firma il cifrato con la propria chiave privata $sk_S$.
 			
 			\item \textbf{Inoltro dell'ACK: } S invia all'Authenticator la ricevuta indicante il completamento del processo
-			$$ (c_S||\sigma_S) $$
+			$$ (c||\sigma_S) $$
 		\end{enumerate}
 		
 	\subsubsection{A $\to$ U: ACK e Finalizzazione}
 		\begin{enumerate}
-			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c_S||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
-			$$ V_{pk_S}(c_S, \sigma_S) $$
+			\item \textbf{Verifica dell'ACK:} A riceve il pacchetto $(c||\sigma_S)$, e come primo passaggio deve verificare l'integrità e l'autenticità del messaggio, quindi controlla la firma digitale $\sigma_S$ con la chiave pubblica di S $pk_S$:
+			$$ V_{pk_S}(c, \sigma_S) $$
 			\begin{itemize}
 				\item Se $V=0$ allora il messaggio è stato manipolato o non è stato trasmesso dal server, pertanto si scarta immediatamente l'ACK e si notifica il mittente che l'operazione è stata annullata.
 				
 				\item Se restituisce 1 allora il messaggio è integro ed è stato mandato effettivamente dal server perchè solo lui conosce la propria chiave privata $sk_S$ che gli ha permesso di generare la firma digitale $\sigma_S$.
 			\end{itemize}
 			
-			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c_S$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
-			$$ (ACK\|nonce) = \text{Dec}_{sk_A}(c_S) $$
+			\item \textbf{Decifrazione dell'ACK:} Poiché S ha applicato una cifratura asimmetrica al messaggio di ACK, A deve decifrare il messaggio $c$ con la propria chiave privata $sk_A$ per ottenere il messaggio in chiaro:
+			$$ (ACK\|nonce) = \text{Dec}_{sk_A}(c) $$
 			Dopo aver verificato la firma digitale si ha la certezza matematica che il messaggio proviene dal server, e che non è stato manipolato, quindi se la decifrazione restituisce un messaggio di ACK valido, A può essere certo che il voto è stato registrato correttamente nel server. Inoltre deve controllare che il nonce ricevuto in questo messaggio di ACK sia lo stesso che aveva inviato al server, in modo da garantire che l'ACK ricevuto è effettivamente la risposta al voto inviato e non un messaggio di ACK vecchio o di un altro voto.
 
 			\item \textbf{Salvataggio dell'hash dell'elettore:} Solo dopo aver verificato che il voto è stato registrato correttamente, A può procedere a inserire l'hash della chiave pubblica dell'utente $H(pk_U)$ nella mappa degli utenti che hanno già votato, in questo modo si impedisce il doppio voto da parte dello stesso elettore.
