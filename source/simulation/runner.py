@@ -28,17 +28,16 @@ def runFullProtocol():
     authenticator.generateKeyPair()
     authenticator.generateUnsignedCertificate()
     authenticator.signCertificateWithCA()
-
+    #print(authenticator)
 
     server = Server("University Voting Server", "vote.unisa.it")
     server.setCertificateAuthority(ca)
     server.generateKeyPair()
     server.generateUnsignedCertificate()
     server.signCertificateWithCA()
-    
+    #print(server)
 
     sava = User("sava", "IE22700086")
-    #print(sava)
     sava.setCertificateAuthority(ca)
     sava.generateKeyPair()
     sava.generateUnsignedCertificate()

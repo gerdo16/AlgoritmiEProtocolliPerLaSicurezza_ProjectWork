@@ -71,12 +71,11 @@ class User:
 
 
     def __str__(self):
-        out = f"\n=================================== User {self.name} ===================================\n"
+        out = f"\n=================================== User: {self.name} ===================================\n"
         out += f" - Matricola: {self.matriculation_number}\n"
         out += f" - Public Key: {self.pk}\n"
         out += f" - Private Key: è privata non si può vedere :)\n"
         out += f" - Certificato: {self.cert}\n"
-        out += f" - Certificato firmato: {self.cert.isSigned()}\n"
         out += f" - CA: {self.ca}\n"
         out += "=================================================================================\n"
         return out

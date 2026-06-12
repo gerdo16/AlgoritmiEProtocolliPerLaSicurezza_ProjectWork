@@ -60,7 +60,7 @@ class CertificationAuthority:
     
 
     def __str__(self):
-        out = f"\n=================================== Certification Authority {self.name} ===================================\n"
+        out = f"\n=========== Certification Authority: {self.name} ===========\n"
         out += f" - Address: {self.address}\n"
         out += f" - Public Key: {self.pk}\n"
         out += f" - Private Key: è privata non si può vedere :)\n"
