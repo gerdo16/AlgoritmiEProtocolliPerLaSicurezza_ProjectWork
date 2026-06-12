@@ -1,13 +1,13 @@
-import crypto.asymmetric
+from crypto.asymmetric import generate_rsa_key_pair
 from models.certificate import Certificate
-from actors.certificateauthority import CertificationAuthority
+from actors.certificationauthority import CertificationAuthority
 
 class User:
     def __init__(self, name:str, matriculation_number:str):
         self.name = name
         self.matriculation_number = matriculation_number
         self.sk, self.pk = None, None
-        self.cert = None
+        self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
         print(f"[User] Utente {self.name} creato con matricola {self.matriculation_number}")
 
@@ -31,7 +31,7 @@ class User:
 
     # ========================== Fase Certificato utente ==========================
     def generateKeyPair(self):
-        self.sk, self.pk = crypto.asymmetric.generate_rsa_key_pair()
+        self.sk, self.pk = generate_rsa_key_pair()
         print(f"[User] Utente genera la propria Chiave privata e pubblica")
 
 
@@ -41,6 +41,10 @@ class User:
         
         if self.pk is None:
             raise RuntimeError("L'utente non ha generato le chiavi!")
+
+        if self.cert is not None:
+            print("[User] Utente ha già un certificato unsigned!")
+            return
 
         issuer_name = self.ca.getName()
         subject_name = self.matriculation_number
