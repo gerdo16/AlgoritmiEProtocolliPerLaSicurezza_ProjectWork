@@ -61,4 +61,29 @@ def decrypt(private_key, data: bytes) -> bytes:
 
 
 """ firma un messaggio usando la chiave privata """
-#def sign()
+def sign(private_key, message: bytes) -> bytes:
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+""" verifica la firma di un messaggio usando la chiave pubblica """
+def verify(public_key, message: bytes, signature: bytes) -> bool:
+    try:
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except:
+        return False
