@@ -22,7 +22,7 @@ class Certificate:
         )
 
         self._signed = False
-        print(f"[Certificate] Certificato Unsigned creato per {subject_name} per la CA {issuer_name}")
+        print(f"[Certificate] Certificato Unsigned creato per \"{subject_name}\" per la CA \"{issuer_name}\"")
 
 
 
@@ -63,15 +63,16 @@ class Certificate:
             return 0  # se il certificato non è firmato oppure fallisce la verifica, ritorno 0
 
 
-    """ TRASFORMA UN CERTIFICATO FIRMATO IN BYTE """
     def to_bytes(self) -> bytes: 
+        """ TRASFORMA UN CERTIFICATO FIRMATO IN BYTE """
         if not self._signed:
             raise RuntimeError("Solo i certificati firmati possono essere serializzati in DER")
         return self.cert.public_bytes(Encoding.DER)
     
-    """ TRASFORMA I BYTE RICEVUTI IN UN CERTIFICATO FIRMATO """
+
     @classmethod
     def from_bytes(cls, data: bytes) -> "Certificate":
+        """ TRASFORMA I BYTE RICEVUTI IN UN CERTIFICATO FIRMATO """
         instance = cls.__new__(cls)
         instance.cert = x509.load_der_x509_certificate(data)
         instance._signed = True
@@ -79,8 +80,10 @@ class Certificate:
         instance._subject = instance.cert.subject
         return instance
     
-    """ TRASFORMA UN CERTIFICATO NON FIRMATO IN BYTE """
+
+
     def to_csr_bytes(self, private_key) -> bytes:
+        """ TRASFORMA UN CERTIFICATO NON FIRMATO IN BYTE """
         if self._signed:
             raise RuntimeError("Il certificato è già firmato, usa to_bytes()")
         csr = (

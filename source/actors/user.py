@@ -9,7 +9,7 @@ class User:
         self.sk, self.pk = None, None
         self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
-        print(f"[User] Utente {self.name} creato con matricola {self.matriculation_number}")
+        print(f"[User] Utente \"{self.name}\" creato con matricola \"{self.matriculation_number}\"")
 
     
     def getName(self):
@@ -24,7 +24,7 @@ class User:
     def getCertificateAuthority(self):
         return self.ca
 
-    def setCertificateAuthority(self, ca: "CertificationAuthority"):
+    def setCertificationAuthority(self, ca: "CertificationAuthority"):
         self.ca = ca
 
 
@@ -32,7 +32,7 @@ class User:
     # ========================== Fase Certificato utente ==========================
     def generateKeyPair(self):
         self.sk, self.pk = generate_rsa_key_pair()
-        print(f"[User] Utente genera la propria Chiave privata e pubblica")
+        print(f"[User] Utente \"{self.name}\" genera la propria Chiave privata e pubblica")
 
 
     def generateUnsignedCertificate(self):
@@ -43,13 +43,13 @@ class User:
             raise RuntimeError("L'utente non ha generato le chiavi!")
 
         if self.cert is not None:
-            print("[User] Utente ha già un certificato unsigned!")
+            print(f"[User] Utente \"{self.name}\" ha già un certificato unsigned!")
             return
 
         issuer_name = self.ca.getName()
         subject_name = self.matriculation_number
         self.cert = Certificate(subject_name, issuer_name, self.pk)
-        print(f"[User] Utente genera certificato unsigned {self.name} per la CA {issuer_name}")
+        print(f"[User] Utente \"{self.name}\" genera certificato unsigned per la CA \"{issuer_name}\"")
 
 
     def signCertificateWithCA(self):
@@ -59,7 +59,7 @@ class User:
         if self.cert is None:
             raise RuntimeError("L'utente non ha un certificato da firmare!")
 
-        print(f"[User] Utente richiede firma del certificato alla CA di riferimento: {self.ca.getName()}")
+        print(f"[User] Utente \"{self.name}\" richiede firma del certificato alla CA di riferimento: {self.ca.getName()}")
         self.cert = self.ca.sign(self.cert)
 
 

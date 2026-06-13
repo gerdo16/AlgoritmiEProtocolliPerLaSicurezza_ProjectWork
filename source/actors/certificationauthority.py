@@ -15,7 +15,7 @@ class CertificationAuthority:
         self.address = address
         self.sk, self.pk = generate_rsa_key_pair()
         self.cert = None
-        print(f"[CertificationAuthority] CA {self.name} creata con chiave privata e pubblica")
+        print(f"[CertificationAuthority] CA \"{self.name}\" creata con chiave privata e pubblica")
 
 
     def getName(self):
@@ -27,15 +27,18 @@ class CertificationAuthority:
     def getPublicKey(self):
         return self.pk
     
+    def getCertificate(self):
+        return self.cert
+    
 
 
     def autoSignCertificate(self):
-        """ Firma il proprio certificato con la propria chiave privata """
+        """ Firma il proprio certificato con la propria chiave privata (si autocertifica) """
         if self.cert is not None:
-            print("[CertificationAuthority] CA ha già un certificato firmato!")
+            print(f"[CertificationAuthority] CA \"{self.name}\" ha già un certificato firmato!")
             return
         
-        print(f"[CertificationAuthority] CA {self.name} genera e firma il proprio certificato (si autocertifica)")
+        print(f"[CertificationAuthority] CA \"{self.name}\" genera e firma il proprio certificato (si autocertifica)")
         self.cert = Certificate(self.name, self.address, self.pk)
         signed_cert = self.cert.cert.sign(private_key=self.sk, algorithm=hashes.SHA256())
         self.cert.setCertificate(signed_cert)
@@ -44,14 +47,14 @@ class CertificationAuthority:
 
 
     def sign(self, cert: "Certificate") -> "Certificate":
-        """ Firma il certificato con la chiave privata della CA ! """
+        """ La CA firma il certificato del Server, Authenticator o User con la propria chiave privata ! """
         if cert.isSigned():
-            print("Certificato già firmato!")
+            print(f"[CertificationAuthority] CA \"{self.name}\" - Certificato già firmato!")
             return
         
-        print(f"[CertificationAuthority] CA {self.name} verifica della legittimità del certificato prima della firma...") # OIDC
+        print(f"[CertificationAuthority] CA \"{self.name}\" verifica della legittimità del certificato prima della firma...") # OIDC
 
-        print(f"[CertificationAuthority] CA {self.name} firma il certificato per {cert.getSubject()}")
+        print(f"[CertificationAuthority] CA \"{self.name}\" firma il certificato per \"{cert.getSubject()}\"")
         signed_cert = cert.cert.sign(private_key=self.sk, algorithm=hashes.SHA256())
         cert.setCertificate(signed_cert)
         cert.setSigned(True)
@@ -60,7 +63,7 @@ class CertificationAuthority:
     
 
     def __str__(self):
-        out = f"\n=========== Certification Authority: {self.name} ===========\n"
+        out = f"\n=========== Certification Authority: \"{self.name}\" ===========\n"
         out += f" - Address: {self.address}\n"
         out += f" - Public Key: {self.pk}\n"
         out += f" - Private Key: è privata non si può vedere :)\n"
