@@ -1,6 +1,7 @@
 from crypto.asymmetric import generate_rsa_key_pair
 from models.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
+from actors.authenticator import Authenticator
 
 class User:
     def __init__(self, name:str, matriculation_number:str):
@@ -9,6 +10,8 @@ class User:
         self.sk, self.pk = None, None
         self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
+        self.serverCert = None
+        self.authenticatorCert = None
         print(f"[User] Utente \"{self.name}\" creato con matricola \"{self.matriculation_number}\"")
 
     
@@ -63,8 +66,33 @@ class User:
         self.cert = self.ca.sign(self.cert)
 
 
+    # ========================== Fase Handshake ==========================
+
+    
+    def voteRequestSend(self, authenticator: "Authenticator"):
+        print(f"[User] Utente \"{self.name}\" trasmette un messaggio di Vote Request all'Autheticator: {authenticator.getName()}")
+        
+        self.authenticatorCert, self.serverCert = authenticator.voteRequestReceive(self)
+
+        if self.authenticatorCert is None:
+            raise RuntimeError("Certificato dell'Authenticator non esistente.")
+        if self.serverCert is None:
+            raise RuntimeError("Certificato del Server non esistente.")
     
 
+    def verifyCertificates(self):
+        print(f"[User] Utente \"{self.name}\" verifica il certificato dell'Authenticator con la chiave pubblica della Certification Authority.")
+
+        if self.authenticatorCert.verify(self.ca.getCertificate()) == 0:
+            raise RuntimeError("Certificato dell'Authenticator non valido.")
+        
+        print(f"[User] Utente \"{self.name}\" ha validato il certificato dell'Authenticator.")
+        print(f"[User] Utente \"{self.name}\" verifica il certificato del Server con la chiave pubblica della Certification Authority.")
+
+        if self.serverCert.verify(self.ca.getCertificate()) == 0:
+            raise RuntimeError("Certificato dell'Authenticator non valido.")
+
+        print(f"[User] Utente \"{self.name}\" ha validato il certificato del Server.")
 
     # ========================== Fase Trasmissione voto ==========================
 

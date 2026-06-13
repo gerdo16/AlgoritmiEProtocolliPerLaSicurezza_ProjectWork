@@ -81,19 +81,6 @@ class Certificate:
         return instance
     
 
-
-    def to_csr_bytes(self, private_key) -> bytes:
-        """ TRASFORMA UN CERTIFICATO NON FIRMATO IN BYTE """
-        if self._signed:
-            raise RuntimeError("Il certificato è già firmato, usa to_bytes()")
-        csr = (
-            x509.CertificateSigningRequestBuilder()
-            .subject_name(self.cert.subject_name())
-            .sign(private_key, hashes.SHA256())
-        )
-        return csr.public_bytes(Encoding.DER)
-    
-
     def __str__(self):
         out = f"\n===Certificate===\n"
         out += f" - Subject: {self.subject}\n"
