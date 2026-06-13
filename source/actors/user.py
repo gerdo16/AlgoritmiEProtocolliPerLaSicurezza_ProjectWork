@@ -1,8 +1,9 @@
-from crypto.asymmetric import generate_rsa_key_pair, rsa_encrypt, rsa_decrypt, sign
+from crypto.asymmetric import generate_rsa_key_pair, rsa_encrypt, rsa_decrypt, rsa_encrypt_chunks, sign
 from models.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
 import random
 from actors.authenticator import Authenticator
+import crypto.utils as utils
 
 class User:
     def __init__(self, name:str, matriculation_number:str):
@@ -67,9 +68,8 @@ class User:
         self.cert = self.ca.sign(self.cert)
 
 
-    # ========================== Fase Handshake ==========================
 
-    
+    # ========================== Fase Handshake ==========================
     def voteRequestSend(self, authenticator: "Authenticator"):
         print(f"[User] Utente \"{self.name}\" trasmette un messaggio di Vote Request all'Autheticator: {authenticator.getName()}")
         
@@ -95,8 +95,10 @@ class User:
 
         print(f"[User] Utente \"{self.name}\" ha validato il certificato del Server.")
 
+
+
     # ========================== Fase Trasmissione voto ==========================
-    def create_Cfinal(self) -> bytes:
+    def createCfinal(self) -> bytes:
         """ C_final = Enc_{pk_A}(s || c || c' || Cert(U)) """
 
         v:str = random.choice(["SI", "NO"]) # Voto dell'utente, scelto casualmente per la simulazione
@@ -107,21 +109,24 @@ class User:
 
         # Cifratura interna -> c = Enc_{pk_S}(v)
         c:bytes = rsa_encrypt(pk_S, v.encode())
+        print(f"[User] Utente \"{self.name}\" usa la pk_S per cifrare il voto ottenendo c=Enc_pkS(v)")
 
         # Firma del cifrato -> sigma = Enc_{sk_U}(c)
         sigma:bytes = sign(self.sk, c)
+        print(f"[User] Utente \"{self.name}\" usa la propria chiave privata per firmare c ottenendo sigma=Sign_skU(c)")
 
         # Seconda cifratura voto -> c' = Enc_{pk_U}(v)
         c_prime:bytes = rsa_encrypt(self.pk, v.encode())
+        print(f"[User] Utente \"{self.name}\" usa la pk_U per cifrare il voto ottenendo c'=Enc_pkU(v)")
 
         # Cifratura esterna -> C_final = Enc_{pk_A}(s || c || c' || Cert(U))
         cert_u_bytes:bytes = self.cert.to_bytes()
-        data_concatenated:bytes = sigma + c + c_prime + cert_u_bytes
-        C_final:bytes = rsa_encrypt(pk_A, data_concatenated)
+        data_concatenated:bytes = utils.pack_fields(sigma, c, c_prime, cert_u_bytes)
+        C_final_chunks: list[bytes] = rsa_encrypt_chunks(pk_A, data_concatenated)
 
         print(f"[User] Utente \"{self.name}\" usa la pk_A per cifrare i dati ottenendo C_final=Enc_pkA(s || c || c' || Cert(U))")
 
-        return C_final
+        return C_final_chunks
 
 
 

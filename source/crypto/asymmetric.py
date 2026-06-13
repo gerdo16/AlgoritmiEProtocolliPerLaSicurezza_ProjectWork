@@ -1,9 +1,11 @@
-from .utils import pack_fields, unpack_fields
-
+from typing import List
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.exceptions import InvalidSignature
 import os
+
+
 
 """ genera una chiave privata e una chiave pubblica"""
 def generate_rsa_key_pair():
@@ -38,51 +40,51 @@ def rsa_decrypt(private_key, ciphertext: bytes) -> bytes:
     return plaintext
 
 
-""" crifra un messaggio con una chiave AES generata casualmente, e cifra la chiave AES con la chiave pubblica RSA """
-def hybrid_encrypt(public_key, plaintext: bytes) -> bytes:
-    # chiave AES casuale
-    aes_key = os.urandom(32)
-    
-    # nonce casuale per AES-GCM
-    nonce = os.urandom(12)
-    
-    # cifrare il messaggio con AES-GCM
-    aes = AESGCM(aes_key)
-    ciphertext = aes.encrypt(nonce, plaintext, None)
-    
-    # cifrare la chiave AES con RSA
-    encrypted_key = public_key.encrypt(
-        aes_key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+def rsa_encrypt_chunks(public_key, plaintext: bytes, chunk_size: int = 190) -> List[bytes]:
+    """
+    Suddivide il plaintext in chunk e cifra ciascun chunk con RSA-OAEP.
+    Ritorna una lista di crittogrammi (bytes).
+    """
+    encrypted_chunks = []
+    # Itera sul plaintext a passi di 'chunk_size'
+    for i in range(0, len(plaintext), chunk_size):
+        chunk = plaintext[i : i + chunk_size]
+        
+        # Cifra il singolo blocco
+        ciphertext = public_key.encrypt(
+            chunk,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
-    
-    return pack_fields(encrypted_key, nonce, ciphertext)
-    
+        encrypted_chunks.append(ciphertext)
+        
+    return encrypted_chunks
 
-""" decifra una chiave AES cifrata con RSA, e usa la chiave AES per decifrare il messaggio """
-def hybrid_decrypt(private_key, data: bytes) -> bytes:
-    # Ottengo la chiave AES cifrata, il nonce e il cyphertext
-    enc_key, nonce, ciphertext = unpack_fields(data, 3)
-    
-    # chiave AES decifrata con RSA
-    aes_key = private_key.decrypt(
-        enc_key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-    
-    # plaintext decifrato con AES-GCM
-    plaintext = AESGCM(aes_key).decrypt(nonce, ciphertext, None)
 
-    return plaintext
-
+def rsa_decrypt_chunks(private_key, encrypted_chunks: List[bytes]) -> bytes:
+    """
+    Decifra una lista di crittogrammi RSA-OAEP e ricompone il plaintext originale.
+    """
+    decrypted_data = b''
+    for i, chunk in enumerate(encrypted_chunks):
+        try:
+            plaintext_chunk = private_key.decrypt(
+                chunk,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            decrypted_data += plaintext_chunk
+        except Exception as e:
+            # Cattura errori di decifratura (es. blocco alterato) e solleva eccezione chiara
+            raise ValueError(f"Fallita la decifrazione del blocco {i}. Messaggio corrotto o manipolato.") from e
+            
+    return decrypted_data
 
 
 """ firma un messaggio usando la chiave privata """
@@ -98,7 +100,7 @@ def sign(private_key, message: bytes) -> bytes:
     return signature
 
 """ verifica la firma di un messaggio usando la chiave pubblica """
-def verify(public_key, message: bytes, signature: bytes) -> bool:
+def verifySign(public_key, message: bytes, signature: bytes) -> bool:
     try:
         public_key.verify(
             signature,
@@ -110,5 +112,13 @@ def verify(public_key, message: bytes, signature: bytes) -> bool:
             hashes.SHA256()
         )
         return True
-    except:
+    except InvalidSignature:
         return False
+
+
+if __name__ == "__main__":
+    # test firma e verifica
+    sk, pk = generate_rsa_key_pair()
+    message = "Questo è un messaggio da firmare.".encode()
+    signature = sign(sk, message)
+    print( verifySign(pk, message, signature) )

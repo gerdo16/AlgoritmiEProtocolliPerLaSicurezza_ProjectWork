@@ -10,8 +10,8 @@ def runFullProtocol():
     print("================================== Inizio simulazione protocollo di votazione ==================================")
     print("================================================================================================================\n\n")
 
-    print("===================================================== Fase preliminare del sistema ==========================================================\n\n")
 
+    print("===================================================== Fase preliminare del sistema ==========================================================")
     ca = CertificationAuthority("University Voting CA", "vote.unisa.it")
     ca.autoSignCertificate()
 
@@ -32,19 +32,26 @@ def runFullProtocol():
     if server.verifyCertificate(authenticator.getCertificate()):
         server.setCAAuthenticatorCertificate(authenticator.getCertificate())    
 
+
+    print("\n\n===================================================== Fase certificato utente ==========================================================")
     user = User("sava", "IE22700086")
     user.setCertificationAuthority(ca)
     user.generateKeyPair()
     user.generateUnsignedCertificate()
     user.signCertificateWithCA()
 
-    print("\n\n===================================================== Fase di handshake ==========================================================\n\n")
-    
+
+    print("\n\n===================================================== Fase di handshake ==========================================================")
     user.voteRequestSend(authenticator=authenticator)
     user.verifyCertificates()
 
 
-    
+    print("\n\n===================================================== Fase trasmissione voto ==========================================================")
+    print("\n\n================ Fase trasmissione voto: U -> A ================")
+    C_final:list[bytes] = user.createCfinal()
+    authenticator.receiveCfinal(C_final)
+
+
 
     print("\n\n================================================================================================================")
     print("=================================== Fine simulazione protocollo di votazione ===================================")

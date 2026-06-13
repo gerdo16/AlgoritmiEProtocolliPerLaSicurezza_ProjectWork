@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from cryptography import x509
+from cryptography.hazmat.primitives import serialization
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import Encoding
@@ -34,6 +35,12 @@ class Certificate:
 
     def getPublicKey(self):
         return self.cert.public_key()
+    
+    def getPublicKeyBytes(self) -> bytes:
+        return self.cert.public_key().public_bytes(Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+
+    def getCertificate(self):
+        return self.cert
     
     def isSigned(self):
         return self._signed
