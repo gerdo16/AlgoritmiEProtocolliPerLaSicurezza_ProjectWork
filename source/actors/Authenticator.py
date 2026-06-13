@@ -9,10 +9,18 @@ class Authenticator:
         self.sk, self.pk = None, None
         self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
+        self.caServer: "Certificate" = None
+        print(f"[Authenticator] Authenticator \"{self.name}\" creato con address \"{self.address}\"")
 
 
     def setCertificationAuthority(self, ca: "CertificationAuthority"):
         self.ca = ca
+
+    def setCAServerCertificate(self, cert: "Certificate"):
+        self.caServer = cert
+    
+    def getCertificate(self):
+        return self.cert
 
 
     def generateKeyPair(self):
@@ -60,5 +68,6 @@ class Authenticator:
         return cert.verify(self.ca.getCertificate())
 
 
+
     def __str__(self):
-        pass
+        return f"[Authenticator] Authenticator \"{self.name}\""

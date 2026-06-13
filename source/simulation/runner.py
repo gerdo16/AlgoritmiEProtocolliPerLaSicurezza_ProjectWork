@@ -37,6 +37,11 @@ def runFullProtocol():
     server.signCertificateWithCA()
     #print(server)
 
+    if authenticator.verifyCertificate(server.getCertificate()):
+        authenticator.setCAServerCertificate(server.getCertificate())
+    if server.verifyCertificate(authenticator.getCertificate()):
+        server.setCAAuthenticatorCertificate(authenticator.getCertificate())    
+
     sava = User("sava", "IE22700086")
     sava.setCertificationAuthority(ca)
     sava.generateKeyPair()

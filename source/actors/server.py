@@ -10,10 +10,19 @@ class Server:
         self.sk, self.pk = None, None
         self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
+        self.caAuthenticator: "Certificate" = None
+        print(f"[Server] Server \"{self.name}\" creato con address \"{self.address}\"")
+
 
 
     def setCertificationAuthority(self, ca: "CertificationAuthority"):
         self.ca = ca
+
+    def setCAAuthenticatorCertificate(self, cert: "Certificate"):
+        self.caAuthenticator = cert
+
+    def getCertificate(self):
+        return self.cert
 
 
     def generateKeyPair(self):
@@ -59,6 +68,7 @@ class Server:
 
         print(f"[Server] Server \"{self.name}\" verifica che il certificato di \"{cert.getSubject()}\" sia stato firmato dalla CA \"{self.ca.getName()}\"...")
         return cert.verify(self.ca.getCertificate())
+
 
 
     def __str__(self):
