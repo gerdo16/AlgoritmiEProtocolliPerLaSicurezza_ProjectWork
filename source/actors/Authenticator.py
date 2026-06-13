@@ -159,12 +159,43 @@ class Authenticator:
 
         return pck_to_server
     
-    def receiveAckFromServer(self, pck_from_server: bytes) -> bytes:
-        # ciao gerryyyy: verifica l'ack e il resto e divertiti
-        pass
+    def receiveAckFromServer(self, pck_from_server: bytes):
+        unpack_from_server = unpack_fields(pck_from_server, 2)
+        c_S, s_S = unpack_from_server[0], unpack_from_server[1]
+        print(f"[Authenticator] Authenticator \"{self.name}\" riceve un pacchetto dal Server.")
         
+        if not verifySign(self.caServer.getPublicKey(), c_S, s_S):
+            raise RuntimeError("Messaggio potenzialmente manipolato.")
+        print(f"[Authenticator] Authenticator \"{self.name}\" verifica correttamente la firma del messaggio ricevuto.")
+
+        decrypted_data = rsa_decrypt(private_key=self.sk, ciphertext=c_S)
+        print(f"[Authenticator] Authenticator \"{self.name}\" decifra correttamente il messaggio.")
+
+        message = unpack_fields(decrypted_data, 2)
+        ack, nonce = message[0], message[1]
+        
+        if not ack == b"ACK":
+            raise RuntimeError("Il messaggio ricevuto non è un ACK.")
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha ricevuto un messaggio di tipo ACK dal Server.")
+
+        if not nonce == self.pendingVote[1]:
+            raise RuntimeError("Ack di un altro pacchetto.")
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha ricevuto correttamente l'ACK del voto inviato al Server.")
+        self.voterMap[self.pendingVote[0]] = self.pendingVote[2]  # pendingvote[0]: hash della chiave dell'utente; pendingvote[2]: voto cifrato dell'utente.
+        self.pendingVote = None
 
 
+    def prepareAckForUser(self, pk) -> List[bytes]:
+        print(f"[Authenticator] Authenticator \"{self.name}\" prepara ACK da inviare all'Utente.")
+        
+        sigma = sign(self.sk, b"ACK")
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha firmato correttamente l'ACK.")
+
+        pack = pack_fields(sigma, b"ACK")
+        c_final = rsa_encrypt_chunks(public_key=pk, plaintext=pack)
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha costruito il messaggio da inviare all'Utente.")
+
+        return c_final
 
     def __str__(self):
         return f"[Authenticator] Authenticator \"{self.name}\""

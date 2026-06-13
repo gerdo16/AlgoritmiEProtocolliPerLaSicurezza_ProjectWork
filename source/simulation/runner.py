@@ -47,15 +47,20 @@ def runFullProtocol():
 
 
     print("\n\n===================================================== Fase trasmissione voto ==========================================================")
-    print("================ Fase trasmissione voto: U -> A ================")
+    print("\n================ Fase trasmissione voto: U -> A ================")
     C_final:list[bytes] = user.createCfinal()
+
+    print("\n================ Fase verifica certificato utente e validazione C_final ================")
     authenticator.receiveCfinal(C_final)
     authenticator.bufferingVote()
+
+    print("\n================ Fase preparazione pacchetto e inoltro voto: A -> S ================")
     pck_to_server:bytes = authenticator.sendPckToServer()
     pck_to_authenticator:bytes = server.receivePckFromAuthenticator(pck_to_server)
+
+    print("\n================ Fase ricezione ACK dell'Authenticator ================")
     authenticator.receiveAckFromServer(pck_to_authenticator)
-
-
+    msg = authenticator.prepareAckForUser(user.getPublicKey())
 
     print("\n\n================================================================================================================")
     print("=================================== Fine simulazione protocollo di votazione ===================================")
