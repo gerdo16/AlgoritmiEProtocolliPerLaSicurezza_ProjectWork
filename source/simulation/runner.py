@@ -6,48 +6,43 @@ from actors.authenticator import Authenticator
 from actors.server import Server
 
 def runFullProtocol():
-    #sk, pk = crypto.asymmetric.generate_rsa_key_pair()
-    #sk_u, pk_u = crypto.asymmetric.generate_rsa_key_pair()
-
-    #cert_ca = Certificate("ca", "ca", pk)
-    #cert_ca.sign(sk)
-
-    #cert_u = Certificate("gerardo", "ca", pk_u)
-    #cert_u.sign(sk)
-
     print("\n\n================================================================================================================")
     print("================================== Inizio simulazione protocollo di votazione ==================================")
     print("================================================================================================================\n\n")
 
+    print("===================================================== Fase preliminare del sistema ==========================================================\n\n")
+
     ca = CertificationAuthority("University Voting CA", "vote.unisa.it")
     ca.autoSignCertificate()
-    #print(ca)
 
     authenticator = Authenticator("University Voting Authenticator", "authenticate.unisa.it")
     authenticator.setCertificationAuthority(ca)
     authenticator.generateKeyPair()
     authenticator.generateUnsignedCertificate()
     authenticator.signCertificateWithCA()
-    #print(authenticator)
 
     server = Server("University Voting Server", "vote.unisa.it")
     server.setCertificationAuthority(ca)
     server.generateKeyPair()
     server.generateUnsignedCertificate()
     server.signCertificateWithCA()
-    #print(server)
 
     if authenticator.verifyCertificate(server.getCertificate()):
         authenticator.setCAServerCertificate(server.getCertificate())
     if server.verifyCertificate(authenticator.getCertificate()):
         server.setCAAuthenticatorCertificate(authenticator.getCertificate())    
 
-    sava = User("sava", "IE22700086")
-    sava.setCertificationAuthority(ca)
-    sava.generateKeyPair()
-    sava.generateUnsignedCertificate()
-    sava.signCertificateWithCA()
-    #print(sava)
+    user = User("sava", "IE22700086")
+    user.setCertificationAuthority(ca)
+    user.generateKeyPair()
+    user.generateUnsignedCertificate()
+    user.signCertificateWithCA()
+
+    print("\n\n===================================================== Fase di handshake ==========================================================\n\n")
+    
+    user.voteRequestSend(authenticator=authenticator)
+    user.verifyCertificates()
+
 
     
 

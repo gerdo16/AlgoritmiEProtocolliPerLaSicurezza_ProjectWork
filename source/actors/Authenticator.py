@@ -21,6 +21,9 @@ class Authenticator:
     
     def getCertificate(self):
         return self.cert
+    
+    def getName(self):
+        return self.name
 
 
     def generateKeyPair(self):
@@ -67,6 +70,13 @@ class Authenticator:
         print(f"[Authenticator] Authenticator \"{self.name}\" verifica che il certificato di \"{cert.getSubject()}\" sia stato firmato dalla CA \"{self.ca.getName()}\"...")
         return cert.verify(self.ca.getCertificate())
 
+
+    # ========================== Fase Handshake ==========================
+
+
+    def voteRequestReceive(self, user: "User") -> tuple["Certificate", "Certificate"]:
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha ricevuto una Vote Requeste dall'Utente \"{user.getName()}\" e restituisce i certificati firmati di Server e Authenticator.")
+        return self.cert, self.caServer
 
 
     def __str__(self):
