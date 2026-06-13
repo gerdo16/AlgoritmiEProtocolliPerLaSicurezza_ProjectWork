@@ -62,6 +62,9 @@ def runFullProtocol():
     authenticator.receiveAckFromServer(pck_to_authenticator)
     msg = authenticator.prepareAckForUser(user.getPublicKey())
 
+    print("\n================ Fase ricezione ACK dell'Utente ================")
+    user.receiveAckFromAuthenticator(msg)
+
     print("\n\n================================================================================================================")
     print("=================================== Fine simulazione protocollo di votazione ===================================")
     print("================================================================================================================\n\n")

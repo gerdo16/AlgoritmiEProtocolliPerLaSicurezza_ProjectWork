@@ -1,4 +1,4 @@
-from crypto.asymmetric import generate_rsa_key_pair, rsa_encrypt, rsa_decrypt, rsa_encrypt_chunks, sign
+from crypto.asymmetric import *
 from models.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
 import random
@@ -129,6 +129,19 @@ class User:
         return C_final_chunks
 
 
+    def receiveAckFromAuthenticator(self, msg: List[bytes]):
+        print(f"[User] Utente \"{self.name}\" ha ricevuto un messaggio dall'Authenticator.")
+
+        decrypted_msg = rsa_decrypt_chunks(private_key=self.sk, encrypted_chunks=msg)
+        print(f"[User] Utente \"{self.name}\" ha decifrato il messaggio ricevuto dall'Authenticator.")
+
+        unpacked_msg = utils.unpack_fields(decrypted_msg, 2)
+        sigma, ack = unpacked_msg[0], unpacked_msg[1]
+
+        if not verifySign(public_key=self.authenticatorCert.getPublicKey(), message=ack, signature=sigma):
+            raise RuntimeError("Firma non valida.")
+        print(f"[User] Utente \"{self.name}\" ha verificato correttamente la firma del messaggio.")
+        print(f"[User] Utente \"{self.name}\" ha concluso la sua votazione correttamente, conscio che il suo voto sia stato registrato.")
 
 
 
