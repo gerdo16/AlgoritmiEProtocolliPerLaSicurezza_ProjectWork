@@ -1,8 +1,11 @@
+import random
+
 from crypto.asymmetric import *
 from crypto.utils import *
 from models.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
 from cryptography.hazmat.primitives import serialization
+import os
 
 
 class Authenticator: 
@@ -13,9 +16,13 @@ class Authenticator:
         self.cert: "Certificate" = None
         self.ca: "CertificationAuthority" = None
         self.caServer: "Certificate" = None
-        self.voterMap: dict[bytes, bytes] = {} # Mappa per tenere traccia dei voti già ricevuti (chiave: H(pk_U) in bytes, valore: c' in bytes)
+
+        self.voterMap: dict[bytes, bytes] = {} # Mappa per tenere traccia dei voti già ricevuti: [H(pk_U) -> c']
         self.tempVote: tuple[bytes, bytes, "Certificate"] = None
-        self.buffer = None
+
+        self.buffer: list[tuple[bytes, bytes]] = [] # Buffer come lista di messaggi da inviare al Server: lista di [H(pk_U), (c || nonce || sigma_A)], solo (c || nonce || sigma_A) si deve mandare al Server, H(pk_U) serve per la gestione del buffer e per la conferma del voto da parte del Server
+        self.pendingVote: tuple[bytes, bytes, bytes] = None # Voto in attesa di essere confermato dal Server (H(pk_U), nonce, c')
+
         print(f"[Authenticator] Authenticator \"{self.name}\" creato con address \"{self.address}\"")
 
 
@@ -104,8 +111,8 @@ class Authenticator:
 
         # Verifica della firma e dell’integrita'
         if verifySign(cert_user.getPublicKey(), c, s) == False:
-            raise RuntimeError("La firma del voto non è valida.")
-        print(f"[Authenticator] Authenticator \"{self.name}\" ha verificato la firma del voto -> messaggio autenticato e integro.")
+            raise RuntimeError("La firma del voto non è valida ->  -> V_pk_U(c, s) = 0")
+        print(f"[Authenticator] Authenticator \"{self.name}\" ha verificato la firma del voto: messaggio autenticato e integro -> V_pk_U(c, s) = 1")
 
         # Verifica dell’unicita' del voto
         pk_u_bytes = cert_user.getPublicKeyBytes()
@@ -115,6 +122,46 @@ class Authenticator:
         print(f"[Authenticator] Authenticator \"{self.name}\" ha verificato che l'utente non abbia già votato controllando la VoterMap.")
 
         self.tempVote = (c, c_prime, cert_user)
+
+    def bufferingVote(self):
+        if self.tempVote is None:
+            raise RuntimeError("Nessun voto da bufferizzare.")
+        
+        c, c_prime, cert_user = self.tempVote
+
+        # Preparazione del messaggio per S
+        nonce: bytes = os.urandom(16)
+        print(f"[Authenticator] Authenticator \"{self.name}\" genera il nonce: {nonce}")
+
+        # sigma_A = Sign_skA(c || nonce) = Sign_skA(Enc_pkS(v) || nonce)
+        data_to_sign: bytes = pack_fields(c, nonce)
+        sigma_A = sign(self.sk, data_to_sign)
+        print(f"[Authenticator] Authenticator \"{self.name}\" firma il messaggio (c || nonce) ottenendo sigma_A=Sign_skA(c || nonce)")
+
+        pck_to_server: bytes = pack_fields(c, nonce, sigma_A)
+        print(f"[Authenticator] Authenticator \"{self.name}\" è pronto il messaggio da inviare al Server: (c || nonce || sigma_A)")
+
+        # bufferizzazione del messaggio da inviare al Server
+        self.buffer.append((sha256(cert_user.getPublicKeyBytes()), pck_to_server))
+        print(f"[Authenticator] Authenticator \"{self.name}\" bufferizza il messaggio da inviare al Server nella mappa buffer: [H(pk_U) -> (c || nonce || sigma_A)]")
+
+    def sendPckToServer(self) -> bytes:
+        """ Estrae un messaggio dal buffer e lo restituisce per inviarlo al Server """
+        if len(self.buffer) == 0:
+            raise RuntimeError("Nessun messaggio da inviare al Server.")
+
+        # Estrazione casuale di un messaggio dal buffer
+        pk_u_hash, pck_to_server = self.buffer.pop(random.randint(0, len(self.buffer) - 1))
+        print(f"[Authenticator] Authenticator \"{self.name}\" estrae un messaggio dal buffer per inviarlo al Server.")
+
+        nonce = unpack_fields(pck_to_server, 3)[1] # Estraggo solo il nonce dal pacchetto da inviare al Server
+        self.pendingVote = (pk_u_hash, nonce, self.tempVote[1]) # Salvo il voto in attesa di conferma dal Server (H(pk_U), nonce, c')
+
+        return pck_to_server
+    
+    def receiveAckFromServer(self, pck_from_server: bytes) -> bytes:
+        pass
+        
 
 
 

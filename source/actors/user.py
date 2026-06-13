@@ -91,7 +91,7 @@ class User:
         print(f"[User] Utente \"{self.name}\" verifica il certificato del Server con la chiave pubblica della Certification Authority.")
 
         if self.serverCert.verify(self.ca.getCertificate()) == 0:
-            raise RuntimeError("Certificato dell'Authenticator non valido.")
+            raise RuntimeError("Certificato del Server non valido.")
 
         print(f"[User] Utente \"{self.name}\" ha validato il certificato del Server.")
 
