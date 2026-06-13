@@ -160,6 +160,7 @@ class Authenticator:
         return pck_to_server
     
     def receiveAckFromServer(self, pck_from_server: bytes) -> bytes:
+        # ciao gerryyyy: verifica l'ack e il resto e divertiti
         pass
         
 

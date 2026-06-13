@@ -47,12 +47,13 @@ def runFullProtocol():
 
 
     print("\n\n===================================================== Fase trasmissione voto ==========================================================")
-    print("\n\n================ Fase trasmissione voto: U -> A ================")
+    print("================ Fase trasmissione voto: U -> A ================")
     C_final:list[bytes] = user.createCfinal()
     authenticator.receiveCfinal(C_final)
     authenticator.bufferingVote()
     pck_to_server:bytes = authenticator.sendPckToServer()
     pck_to_authenticator:bytes = server.receivePckFromAuthenticator(pck_to_server)
+    authenticator.receiveAckFromServer(pck_to_authenticator)
 
 
 
