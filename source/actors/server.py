@@ -131,13 +131,13 @@ class Server:
     # pubblicazione dei risultati finali della votazione
     def publishResults(self, verbose: bool = True) -> bytes:
         print(f"{PRINT_START_SERVER} Server \"{self.name}\" pubblica i risultati finali della votazione...") if verbose else None
-        tmp:str = SERVER_COLOR + "SI: " + str(self.voteDatabase["SI"]) + " | NO: " + str(self.voteDatabase["NO"]) + RESET_COLOR
-        result_bytes:bytes = tmp.encode()
+        result_str:str = "SI: " + str(self.voteDatabase["SI"]) + " | NO: " + str(self.voteDatabase["NO"])
+        result_bytes:bytes = result_str.encode()
 
         s_S = sign(self.sk, result_bytes)
         print(f"{PRINT_START_SERVER} Server \"{self.name}\" firma i risultati con la propria chiave privata ottenendo s_S = Enc_sk_S(result)") if verbose else None
 
-        print(f"{PRINT_START_SERVER} Server \"{self.name}\" {result_bytes} con firma s_S = {s_S}") if verbose else None
+        print(f"{PRINT_START_SERVER} Server \"{self.name}\" pubblica i risultati: {SERVER_COLOR}{result_str}{RESET_COLOR}, con firma s_S = {s_S}") if verbose else None
 
         result: bytes = pack_fields(result_bytes, s_S)
         return result

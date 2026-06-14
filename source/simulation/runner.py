@@ -32,18 +32,18 @@ def runFullProtocol():
     if server.verifyCertificate(authenticator.getCertificate()):
         server.setCAAuthenticatorCertificate(authenticator.getCertificate())    
 
-
+    print()
 
     tmp_list:list[tuple[str, str]] = [
-        ("sava", "IE22700086"),
+        ("Pippo", "IE22700086"),
         ("gerry", "IE22700089"),
-        ("Pippo", "IE22800290"),
-        #("Luca", "IE22800391"),
-        #("Gino", "IE22800692"),
-        #("Mario", "IE22800993"),
-        #("Francesco", "IE22801294"),
-        #("Giovanni", "IE22801595"),
-        #("Simone", "IE22801896")
+        ("sava", "IE22800290"),
+        ("Luca", "IE22800391"),
+        ("Gino", "IE22800692"),
+        ("Mario", "IE22800993"),
+        ("Francesco", "IE22801294"),
+        ("Giovanni", "IE22801595"),
+        ("Simone", "IE22801896")
     ]
     list_users:list[User] = []
     [list_users.append(User(name, matriculation_number)) for name, matriculation_number in tmp_list]
