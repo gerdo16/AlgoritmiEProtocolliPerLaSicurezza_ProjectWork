@@ -1,5 +1,5 @@
 from actors.certificationauthority import CertificationAuthority
-from models.certificate import Certificate
+from model.certificate import Certificate
 from crypto.asymmetric import *
 from crypto.utils import *
 from actors.constants import PRINT_START_SERVER, SERVER_COLOR, RESET_COLOR

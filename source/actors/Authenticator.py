@@ -2,7 +2,7 @@ import random
 
 from crypto.asymmetric import *
 from crypto.utils import *
-from models.certificate import Certificate
+from model.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
 from cryptography.hazmat.primitives import serialization
 import os

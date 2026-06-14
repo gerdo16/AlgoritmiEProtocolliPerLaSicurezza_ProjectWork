@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 from crypto.asymmetric import generate_rsa_key_pair
-from models.certificate import Certificate
+from model.certificate import Certificate
 from actors.constants import PRINT_START_CA
 
 

@@ -1,0 +1,27 @@
+\subsection{Struttura ed Esecuzione del Progetto}
+All'interno della cartella principale del progetto è presente la cartella \texttt{source}, che contiene il codice sorgente del progetto, organizzato in 4 cartelle principali: \texttt{actors}, \texttt{crypto}, \texttt{models} e \texttt{simulation}.
+
+\begin{figure}[H]
+	\includegraphics{./img/struttura_progetto.png}
+	\centering
+\end{figure}
+In particolare:
+\begin{itemize}
+	\item \textbf{actors:} contiene le classi che rappresentano i vari attori del sistema (Utente, Authenticator, Server, CA).
+
+	\item \textbf{crypto:} contiene le classi che implementano le primitive crittografiche utilizzate nel sistema (ad esempio, firme digitali, cifratura).
+
+	\item \textbf{models:} contiene una classe wrapper per i certificati digitali, che semplifica la gestione dei certificati all'interno delle funzioni delle classi degli attori, nascondendo i dettagli di implementazione dei certificati digitali.\\
+	In un'implementazione futura può essere ragionevole creare le classi wrapper per le strutture dati (come la VoterMap, il buffer dell'Authenticator e la lista dei nonce del server) e per i pacchetti scambiati tra gli attori, in modo da semplificare e rendere ancora più leggibile la comunicazione tra gli attori.
+
+	\item \textbf{simulation:} contiene la funzione runner che simula l'intero processo di voto, dalla registrazione degli utenti alla pubblicazione dei risultati, per uno o più utenti, con la possibilità di visualizzare l'output dettagliato o sintetico del processo di voto. 
+\end{itemize}
+
+All'interno della cartella source del progetto è presente il file \texttt{main.py}, che permette di eseguire la simulazione. Quindi per avviare la simulazione dalla cartella principale del progetto, è possibile eseguire il comando:
+\begin{lstlisting}
+$ python ./source/main.py
+\end{lstlisting}
+
+\subsection{Simulazione e Output}
+
+\subsection{Miglioria futura}

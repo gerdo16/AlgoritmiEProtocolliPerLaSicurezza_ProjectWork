@@ -1,5 +1,5 @@
 from crypto.asymmetric import *
-from models.certificate import Certificate
+from model.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
 import random
 from actors.authenticator import Authenticator

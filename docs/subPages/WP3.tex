@@ -94,12 +94,10 @@ Tuttavia, all'interno del $C_{final}$ decifrato dall'Authenticator, il voto appa
 Un gestore del Server potrebbe tentare di associare il voto al rispettivo elettore. \\
 Il pacchetto che il Server riceve e valida è unicamente $(c \| \text{nonce} \| \sigma_A)$. Seppur tramite la propria $sk_S$ il Server decifra $c$ per ottenere la preferenza "SI" o "NO" in chiaro e conteggiarla, esso non ha a disposizione né $\text{Cert(U)}$ né altre informazioni. L'anonimato del voto lato Server è quindi preservato, assumendo assenza di collusione con l'Authenticator.
 
-\subsection{Migliorie future}
+\subsection{Miglioria future}
 
 \paragraph{Legittimità degli elettori:}
 Fino ad adesso è stato considerato che gli elettori sono studenti con una matricola valida e quindi è stato assunto che per ottenere un certificato digitale valido, un utente debba inserire la propria matricola corretta. Tuttavia, questo meccanismo non è completamente sicuro, in quanto chiunque potrebbe inserire una matricola di uno studente e ottenere un certificato valido. Per mitigare questo rischio, si potrebbe usare un sistema di User Authentication come OIDC (OpenID Connect).\\
 In particolare il modello pensato è il Federated Identity Model secondo cui l'utente si autentica presso un Identity Provider (IdP) di fiducia. In questo caso la fase di certificato utente (2.2) viene estesa integrando la richiesta di firma del certificato con un processo di autenticazione OIDC.\\
 Quindi L'Utente $U$ si collega all'IdP dell'Ateneo e si autentica (ad esempio inserendo le proprie credenziali d'Ateneo). L'IdP, verificata l'identità, restituisce all'Utente un $ID\_Token$ firmato digitalmente con la propria chiave privata quindi con $sk_{IdP}$. Questo token contiene, tra i vari dati, la matricola dell'utente.\\
 L'Utente genera la sua coppia di chiavi ($sk_U, pk_U$) e crea il $Cert_{unsigned}(U)$. Quando l'utente invia alla CA il certificato non firmato e il token, la CA prima di firmare esegue i controlli. In particolare verifica la validità dell'$ID\_Token$ utilizzando la chiave pubblica dell'IdP ($pk_{IdP}$) e poi estrae la matricola dal token validato e controlla che coincida esattamente con quella dichiarata nel campo Subject del $Cert_{unsigned}(U)$. Se i controlli passano, la CA calcola l'hash, firma e restituisce il $Cert(U)$ all'Utente, esattamente come nel protocollo originale.
-
-\paragraph{Introduzione della verificabilità universale:}
