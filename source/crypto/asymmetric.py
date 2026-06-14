@@ -15,8 +15,8 @@ def generate_rsa_key_pair():
     )
     return sk, sk.public_key()
 
-""" cifra un messaggio con chiave pubblica RSA """
 def rsa_encrypt(public_key, plaintext: bytes) -> bytes:
+    """ cifra un messaggio con chiave pubblica RSA """
     ciphertext = public_key.encrypt(
         plaintext,
         padding.OAEP(

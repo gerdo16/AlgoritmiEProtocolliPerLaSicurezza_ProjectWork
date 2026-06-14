@@ -7,15 +7,16 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 from crypto.asymmetric import generate_rsa_key_pair
 from models.certificate import Certificate
+from actors.constants import PRINT_START_CA
 
 
 class CertificationAuthority:
-    def __init__(self, name, address):
+    def __init__(self, name, address, verbose: bool = True):
         self.name = name
         self.address = address
         self.sk, self.pk = generate_rsa_key_pair()
         self.cert = None
-        print(f"[CertificationAuthority] CA \"{self.name}\" creata con chiave privata e pubblica")
+        print(f"{PRINT_START_CA} CA \"{self.name}\" creata con chiave privata e pubblica") if verbose else None
 
 
     def getName(self):
@@ -32,13 +33,13 @@ class CertificationAuthority:
     
 
 
-    def autoSignCertificate(self):
+    def autoSignCertificate(self, verbose: bool = True):
         """ Firma il proprio certificato con la propria chiave privata (si autocertifica) """
         if self.cert is not None:
-            print(f"[CertificationAuthority] CA \"{self.name}\" ha già un certificato firmato!")
+            print(f"{PRINT_START_CA} CA \"{self.name}\" ha già un certificato firmato!") if verbose else None
             return
         
-        print(f"[CertificationAuthority] CA \"{self.name}\" genera e firma il proprio certificato (si autocertifica)")
+        print(f"{PRINT_START_CA} CA \"{self.name}\" genera e firma il proprio certificato (si autocertifica)") if verbose else None
         self.cert = Certificate(self.name, self.address, self.pk)
         signed_cert = self.cert.cert.sign(private_key=self.sk, algorithm=hashes.SHA256())
         self.cert.setCertificate(signed_cert)
@@ -46,15 +47,15 @@ class CertificationAuthority:
 
 
 
-    def sign(self, cert: "Certificate") -> "Certificate":
+    def sign(self, cert: "Certificate", verbose: bool = True) -> "Certificate":
         """ La CA firma il certificato del Server, Authenticator o User con la propria chiave privata ! """
         if cert.isSigned():
-            print(f"[CertificationAuthority] CA \"{self.name}\" - Certificato già firmato!")
+            print(f"{PRINT_START_CA} CA \"{self.name}\" - Certificato già firmato!") if verbose else None
             return
         
-        print(f"[CertificationAuthority] CA \"{self.name}\" verifica della legittimità del certificato prima della firma...") # OIDC
+        print(f"{PRINT_START_CA} CA \"{self.name}\" verifica della legittimità del certificato prima della firma...") if verbose else None # OIDC
 
-        print(f"[CertificationAuthority] CA \"{self.name}\" firma il certificato per \"{cert.getSubject()}\"")
+        print(f"{PRINT_START_CA} CA \"{self.name}\" firma il certificato per \"{cert.getSubject()}\"") if verbose else None
         signed_cert = cert.cert.sign(private_key=self.sk, algorithm=hashes.SHA256())
         cert.setCertificate(signed_cert)
         cert.setSigned(True)

@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 class Certificate:
 
-    def __init__(self, subject_name, issuer_name, public_key):
+    def __init__(self, subject_name, issuer_name, public_key, verbose: bool = True):
         self.subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject_name)])
         self.issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer_name)])
 
@@ -23,7 +23,7 @@ class Certificate:
         )
 
         self._signed = False
-        print(f"[Certificate] Certificato Unsigned creato per \"{subject_name}\" per la CA \"{issuer_name}\"")
+        print(f"[Certificate] Certificato Unsigned creato per \"{subject_name}\" per la CA \"{issuer_name}\"") if verbose else None
 
 
 
