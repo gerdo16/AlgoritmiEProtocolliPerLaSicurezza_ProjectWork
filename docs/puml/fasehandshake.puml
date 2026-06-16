@@ -1,0 +1,24 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Diagramma di Sequenza WP2: messaggi del protocollo
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+== Fase di Handshake ==
+U -> A: VoteRequest
+A -> U: invio ( Cert(A), Cert(S) )
+U -> U: Verifica Cert(A) e Cert(S)
+note right
+    L'utente verifica i certificati con 
+    Cert(CA), quindi con pk_CA
+end note
+
+@enduml

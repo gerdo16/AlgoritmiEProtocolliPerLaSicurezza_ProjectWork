@@ -1,0 +1,26 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Diagramma di Sequenza WP2: messaggi del protocollo
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+== Fase Certificato Utente ==
+U -> U: Generazione sk_U e pk_U
+U -> CA: Richiesta Cert(U)
+CA -> CA
+note right
+    La CA verifica l'identità
+    dell'utente e successivamente
+    firma il certificato.
+end note
+CA -> U: invio ( Cert(CA), Cert(U) )
+
+@enduml

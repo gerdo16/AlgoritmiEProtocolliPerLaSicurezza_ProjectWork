@@ -1,0 +1,37 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+
+A -> A: prepara (c, s_A)
+note right
+    c = Enc_pkS(v),
+    s_A = Sign_skA(c)
+end note
+A -> A: bufferizza (c, s_A)
+A -> S: invio (c, s_A)
+
+S -> S: Verifica firma s_A con pk_A
+alt #Pink Failure
+    S -> A: richiesta rifiutata (integrità voto compromessa)
+    A -X U: richiesta rifiutata
+else #LightBlue Successful case
+    S -> S: integrità voto verificata
+end
+S -> S: decifra c con sk_S
+note right
+    S decifra c per ottenere v
+end note
+S -> S: registrazione voto v
+S -> A: ACK
+A -> U: ACK
+
+@enduml

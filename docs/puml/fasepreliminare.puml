@@ -1,0 +1,48 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Diagramma di Sequenza WP2: messaggi del protocollo
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+
+
+
+== Fase Preliminare del sistema ==
+'autonumber 1
+group 1
+CA -> CA: Cert(CA)
+note right
+    La CA genera sk_CA e pk_CA
+    e si autocertifica
+end note
+CA -> A: invio Cert(CA)
+CA -> S: invio Cert(CA)
+end
+
+group 2
+S -> S: Generazione sk_S e pk_S
+S -> CA: Richiesta Cert(S)
+CA -> S: invio Cert(S) firmato da CA
+end
+
+group 3
+A -> A: Generazione sk_A e pk_A
+A -> CA: Richiesta Cert(A)
+CA -> A: invio Cert(A) firmato da CA
+end
+
+group 4
+A -> S: Invio Cert(A) firmato da CA
+S -> A: Invio Cert(S) firmato da CA
+end
+
+
+@enduml

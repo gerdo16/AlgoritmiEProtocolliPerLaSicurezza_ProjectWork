@@ -17,10 +17,17 @@ In questa sezione viene discusso nel dettaglio il protocollo progettato. In ques
 	\caption{Algoritmi utilizzati nel protocollo per le votazioni digitali sicure.}
 	\label{tab:algoritmi}
 \end{table}
-Inoltre lo standard dei certificati scelto è X.509 per la distribuzione delle chiavi pubbliche (PKI), e per la sua capacità di includere campi personalizzati (come il campo Role) che sono utili per distinguere i diversi ruoli all'interno del sistema di voto.
+Inoltre lo standard dei certificati scelto è X.509 per la distribuzione delle chiavi pubbliche (PKI), e per la sua capacità di includere campi personalizzati (come il campo Role) che sono utili per distinguere i diversi ruoli all'interno del sistema di voto. \\
+
+\newpage
 
 \subsection{Fase preliminare del sistema}
 In questa fase vengono generati i certificati degli attori principale del sistema, ovvero il Server e l'Authority. Inoltre, questa fase garantisce la consistenza dei certificati nel tempo, con un meccanismo di ricreazione.
+
+\begin{figure}[H]
+	\centering
+	\scalebox{0.7}{\input{./subPages/fasepreliminare.tex}}
+\end{figure}
 
 \begin{enumerate}
 	\item \textbf{Certificazione della Certificate Authority}: poichè la certificate chain del nostro sistema è composta da una sola certificate authority, questa funge da root ed è in grado di autocertificarsi. Quindi, il primo passo è generare il certificato Cert(CA) della certificate authority e distribuirlo ai membri del sistema (server e Authenticator). Dopo la fase di emissione dei certificati, la CA non partecipa al protocollo di voto.
@@ -98,6 +105,11 @@ In questa fase vengono generati i certificati degli attori principale del sistem
 \subsection{Fase certificato utente}
 Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compito è farsi generare un certificato valido dalla CA in modo da potersi autenticare all'Authenticator.
 
+\begin{figure}[H]
+	\centering
+	\scalebox{0.7}{\input{./subPages/fasecertificatoutente.tex}}
+\end{figure}
+
 \begin{enumerate}
 	\item L'Utente genera una coppia di chiavi (privata $sk_U$, pubblica $pk_U$).
 	\item L'Utente crea un certificato non firmato nel formato x509, composto dai campi (Serial number e Subject sono solo un esempio in questo caso):
@@ -129,6 +141,12 @@ Questa è la prima fase compiuta dall'utente intenzionato a votare. Il suo compi
 \subsection{Fase handshake}
 In questa fase l'utente possiede un certificato valido e vuole comunicare all'Authenticator la sua intenzione a votare, dovendo però verificare le identità dell'Authenticator e del Server.
 
+
+\begin{figure}[H]
+	\centering
+	\scalebox{0.7}{\input{./subPages/fasehandshake.tex}}
+\end{figure}
+
 \begin{enumerate}
 	\item L'Utente trasmette una Vote Request all'Authenticator. Questo messaggio è nel formato:
 	$$
@@ -145,6 +163,20 @@ In questa fase l'utente possiede un certificato valido e vuole comunicare all'Au
 \end{enumerate}
 
 \subsection{Fase trasmissione voto}
+
+\begin{figure}[H]
+	\centering
+	\scalebox{0.63}{\input{./subPages/fasetrasmissionevoto1.tex}}
+\end{figure}
+
+\newpage
+
+\begin{figure}[H]
+	\centering
+	\scalebox{0.63}{\input{./subPages/fasetrasmissionevoto2.tex}}
+\end{figure}
+
+
 	Una volta che lo user ha verificato la validità del certifiacto dell'Authenticator e del Server nella fase precedente, ora usa sia la chiave pubblica di A ($pk_{A}$) che di S ($pk_{S}$) per costruire il primo messaggio di questa fase.\\
 	
 	La fase di trasmissione voto permette di soddisfare il requisito di efficienza, in quanto l'elettore invia un messaggio all'Authenticator che non si compone solo del voto $v$, ma anche del proprio certificato Cert(U). In questo modo la prima operazione che l'Authenticator effettua, quando ricevere questo pacchetto da $U$, è la verifica del certificato dell'entità, per garantire che il voto proviene da un elettore legittimato.\\

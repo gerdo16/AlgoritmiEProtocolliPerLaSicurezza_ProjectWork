@@ -1,0 +1,54 @@
+@startuml
+
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Diagramma di Sequenza WP2: messaggi del protocollo
+
+actor "U: Utente" as U #E8E8FF
+participant "CA" as CA #FFEAD5
+database "A: Authenticator" as A #D5FFD5
+database "S: Server" as S #FFE8E8
+
+
+== Fase Trasmissione voto ==
+U -> A: C_final=Enc_pkA(s, c, c', Cert(U))
+note right
+    c = Enc_pkS(v),
+    s = Sign_skU(c),
+    c' = Enc_pkU(v).
+end note
+
+A -> A: Decifrazione C_final con sk_A
+A -> A: Verifica Cert(U)
+note right
+    A può verificare Cert(U) perchè
+    ha Cert(CA) e quindi pk_CA
+end note
+
+alt #Pink Failure
+    A -X U: richiesta rifiutata (utente non legittimo)
+else #LightBlue Successful case
+    A -> A: autenticazione riuscita
+end
+A -> A: estrae pk_U da Cert(U)
+A -> A: Verifica firma s con pk_U
+alt #Pink Failure
+    A -X U: richiesta rifiutata (integrità voto compromessa)
+else #LightBlue Successful case
+    A -> A: integrità voto verificata
+end
+A -> A: verifica se U ha già votato
+note right
+    A mantiene una mappa <H(pk_U), c'>
+    per verificare se U ha già votato
+end note
+alt #Pink Failure
+    A -X U: richiesta rifiutata (utente ha già votato)
+else #LightBlue Successful case
+    A -> A: voto accettato
+end
+
+@enduml
