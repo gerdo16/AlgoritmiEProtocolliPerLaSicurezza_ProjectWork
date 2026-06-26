@@ -4,7 +4,6 @@ from crypto.asymmetric import *
 from crypto.utils import *
 from model.certificate import Certificate
 from actors.certificationauthority import CertificationAuthority
-from cryptography.hazmat.primitives import serialization
 import os
 from typing import List
 from actors.constants import PRINT_START_AUTHENTICATOR
